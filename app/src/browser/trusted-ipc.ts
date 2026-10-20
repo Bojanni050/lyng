@@ -24,7 +24,7 @@ export function handleFromMailspringWindows(
 ) {
   ipcMain.handle(channel, (event, ...args) => {
     if (!isMailspringWindowContents(event.sender)) {
-      throw new Error(`${channel} is only available to Mailspring windows.`);
+      throw new Error(`${channel} is only available to Nuntio windows.`);
     }
     return handler(event, ...args);
   });

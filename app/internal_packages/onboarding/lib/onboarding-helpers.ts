@@ -152,7 +152,7 @@ function mailspringTemplateFor(domain: string, provider: string) {
 function applyContainerFolderDefault(populated: Account) {
   const containerFolderDefault = AccountStore.containerFolderDefaultGetter();
   if (
-    containerFolderDefault !== 'Mailspring' &&
+    containerFolderDefault !== 'Nuntio' &&
     (populated.settings.container_folder === '' ||
       populated.settings.container_folder === undefined)
   ) {
@@ -255,7 +255,7 @@ export async function expandAccountForSetup(account: Account): Promise<ExpandedA
 
   let confirmServers = false;
   if (mstemplate) {
-    console.log(`Using Mailspring Template: ${JSON.stringify(mstemplate, null, 2)}`);
+    console.log(`Using Nuntio Template: ${JSON.stringify(mstemplate, null, 2)}`);
   } else {
     const [imap, smtp] = await Promise.all([
       srvServerFor(domain, SRV_SERVICES.imap),

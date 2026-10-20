@@ -64,7 +64,7 @@ export function limitNotice(code: string, raw: unknown = {}): LimitNotice | null
   const plan: Plan = details.plan || 'free';
   const resets = resetDate(details.resetsAt);
   const upgrade = localized(
-    'Upgrade to Mailspring Pro and build %@ new Views every month.',
+    'Upgrade to Nuntio Pro and build %@ new Views every month.',
     PRO_MONTHLY_BUILDS
   );
   let message: string;
@@ -145,9 +145,9 @@ export function homeUsageLine(usage: AccountUsage) {
   }
   if (limit === 1) {
     return used >= 1
-      ? localized('Custom views are a Mailspring Pro feature - Upgrade today to create more Views!')
+      ? localized('Custom views are a Nuntio Pro feature - Upgrade today to create more Views!')
       : localized(
-          'Custom views are a Mailspring Pro feature, but you can try building one for free!'
+          'Custom views are a Nuntio Pro feature, but you can try building one for free!'
         );
   }
   return localized('%1$@ of %2$@ free Views used', Math.min(used, limit), limit);

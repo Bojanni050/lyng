@@ -326,7 +326,7 @@ const TESTS = [
     async () => {
       const t = Date.now();
       try {
-        window.alert('Mailspring: your session expired');
+        window.alert('Nuntio: your session expired');
       } catch (e) {
         return BLOCKED(e.message);
       }

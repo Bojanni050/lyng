@@ -31,7 +31,7 @@ export const LocalizedErrorStrings = {
     'Connection Error - Unable to connect to the server / port you provided.'
   ),
   ErrorInvalidAccount: localized(
-    'This account is invalid or Mailspring could not find the Inbox or All Mail folder. %@',
+    'This account is invalid or Nuntio could not find the Inbox or All Mail folder. %@',
     'https://getmailspring.com/docs/enable-all-mail-folder-for-gmail'
   ),
   ErrorTLSNotAvailable: localized('TLS Not Available'),
@@ -78,7 +78,7 @@ export const LocalizedErrorStrings = {
     'Sorry, your SMTP server does not support basic username / password authentication.'
   ),
   ErrorIdentityMissingFields: localized(
-    'Your Mailspring ID is missing required fields - you may need to reset Mailspring. %@',
+    'Your Nuntio ID is missing required fields - you may need to reset Nuntio. %@',
     'https://getmailspring.com/docs/your-mailspring-id-is-missing-required-fields'
   ),
 };

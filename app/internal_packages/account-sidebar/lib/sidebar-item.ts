@@ -64,7 +64,7 @@ const onDeleteItem = function (item: ISidebarItem) {
     type: 'info',
     message: localized('Are you sure?'),
     detail: localized(
-      'Deleting folders and labels cannot be undone and it may take a few minutes for changes to sync to Mailspring.'
+      'Deleting folders and labels cannot be undone and it may take a few minutes for changes to sync to Nuntio.'
     ),
     buttons: [localized('Delete'), localized('Cancel')],
     defaultId: 0,
@@ -206,7 +206,7 @@ function detectFolderSeparator(accountId: string): string {
   // Check category paths for known prefixes — most reliable signal
   for (const cat of CategoryStore.categories(accountId)) {
     const catPath = cat.path;
-    for (const prefix of ['INBOX', '[Gmail]', '[Mailspring]', 'Mailspring']) {
+    for (const prefix of ['INBOX', '[Gmail]', '[Nuntio]', 'Nuntio']) {
       if (catPath.startsWith(prefix) && catPath.length > prefix.length) {
         const ch = catPath[prefix.length];
         if (ch === '.' || ch === '/' || ch === '\\') return ch;

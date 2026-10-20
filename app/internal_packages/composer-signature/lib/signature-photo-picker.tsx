@@ -131,7 +131,7 @@ export default class SignaturePhotoPicker extends React.Component<
     } catch (err) {
       AppEnv.showErrorDialog(
         localized(
-          `Sorry, we couldn't save your signature image to Mailspring's servers. Please try again.\n\n(%@)`,
+          `Sorry, we couldn't save your signature image to Nuntio's servers. Please try again.\n\n(%@)`,
           err.toString()
         )
       );

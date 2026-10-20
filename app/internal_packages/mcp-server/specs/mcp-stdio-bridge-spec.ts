@@ -165,7 +165,7 @@ describe('mcp-stdio-bridge', function () {
     });
   });
 
-  it('answers requests with a JSON-RPC error while Mailspring is not listening', function () {
+  it('answers requests with a JSON-RPC error while Nuntio is not listening', function () {
     waitsForPromise(async () => {
       const client = new BridgeClient(this.configDir);
       try {
@@ -174,7 +174,7 @@ describe('mcp-stdio-bridge', function () {
 
         client.send({ jsonrpc: '2.0', id: 2, method: 'tools/list' });
         const { error } = await client.response(2);
-        expect(error.message).toContain('Mailspring is not running');
+        expect(error.message).toContain('Nuntio is not running');
       } finally {
         await client.close();
       }

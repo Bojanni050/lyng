@@ -150,10 +150,10 @@ class KeyManager {
         // Stored-but-unreadable is not the same as nothing stored. Resolving to an empty keyset
         // would let the next read-modify-write mutator persist it, erasing every account's
         // password over a locked keyring or a secret service that has not started yet.
-        console.error('Mailspring could not read saved passwords.', asyncErr, syncErr);
+        console.error('Nuntio could not read saved passwords.', asyncErr, syncErr);
         this._reportFatalError(
           new Error(
-            localized('Mailspring could not read your saved passwords and cannot continue.') +
+            localized('Nuntio could not read your saved passwords and cannot continue.') +
               this._encryptionUnavailableHint()
           )
         );
@@ -177,7 +177,7 @@ class KeyManager {
       try {
         await this._writeKeyHash(keys);
       } catch (err) {
-        console.warn('Mailspring could not re-encrypt your saved passwords with the new key.', err);
+        console.warn('Nuntio could not re-encrypt your saved passwords with the new key.', err);
       }
     }
 
@@ -187,7 +187,7 @@ class KeyManager {
   _encryptionUnavailableHint() {
     return process.platform === 'linux'
       ? localized(
-          ' On Linux, Mailspring stores passwords in your desktop keyring (KWallet, GNOME Keyring, or another Secret Service provider). Please make sure it is installed, running, and unlocked, then restart Mailspring.'
+          ' On Linux, Nuntio stores passwords in your desktop keyring (KWallet, GNOME Keyring, or another Secret Service provider). Please make sure it is installed, running, and unlocked, then restart Nuntio.'
         )
       : '';
   }
@@ -196,7 +196,7 @@ class KeyManager {
     const unavailable = () =>
       new Error(
         localized(
-          `Mailspring could not store your password securely because encryption is not available on this system.`
+          `Nuntio could not store your password securely because encryption is not available on this system.`
         ) + this._encryptionUnavailableHint()
       );
     if (!(await secureStorage.isAvailable())) {
@@ -220,11 +220,11 @@ class KeyManager {
 
     const clickedButton = require('@electron/remote').dialog.showMessageBoxSync({
       type: 'error',
-      buttons: [localized('Mailspring Help'), localized('Quit')],
+      buttons: [localized('Nuntio Help'), localized('Quit')],
       message:
         err.message ||
         localized(
-          `Mailspring could not store your password securely. For more information, visit %@`,
+          `Nuntio could not store your password securely. For more information, visit %@`,
           'https://getmailspring.com/docs/password-management-error'
         ),
     });

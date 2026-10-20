@@ -161,7 +161,7 @@ class OnboardingStore extends MailspringStore {
       AppEnv.showErrorDialog({
         title: localized('Unable to Add Account'),
         message: localized(
-          'Sorry, something went wrong when this account was added to Mailspring. If you do not see the account, try linking it again. %@',
+          'Sorry, something went wrong when this account was added to Nuntio. If you do not see the account, try linking it again. %@',
           e.toString()
         ),
       });
