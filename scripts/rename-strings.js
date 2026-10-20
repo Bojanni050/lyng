@@ -30,6 +30,9 @@ const SKIP = [
   'mailspring-store',
   'mailspring-observables',
   'mailspring-migrations',
+  // Upstream's starter repos are real, still useful, and not ours to rename.
+  'Mailspring-Plugin-Starter',
+  'Mailspring-Theme-Starter',
 ];
 
 const STRING_KINDS = new Set([
