@@ -39,8 +39,12 @@ if (!distDir) {
   process.exit(1);
 }
 
-if (fs.existsSync(binaryPath) && !force) {
-  console.log(`app/mailsync already present (${fs.statSync(binaryPath).size} bytes) — nothing to do.`);
+// Windows ships mailsync.exe (plus its DLLs), macOS/Linux ship an extensionless wrapper next to
+// mailsync.bin — so "is it installed" cannot be a single path check.
+const candidates = ['mailsync', 'mailsync.exe', 'mailsync.bin'].map((name) => path.join(appDir, name));
+const present = candidates.find((file) => fs.existsSync(file));
+if (present && !force) {
+  console.log(`${path.relative(repoRoot, present)} already present (${fs.statSync(present).size} bytes) — nothing to do.`);
   process.exit(0);
 }
 
@@ -93,11 +97,16 @@ function download(target, redirects = 0) {
             }
             fs.rmSync(tarball, { force: true });
             if (process.platform !== 'win32') {
-              fs.chmodSync(binaryPath, 0o755);
-              const bin = `${binaryPath}.bin`;
-              if (fs.existsSync(bin)) fs.chmodSync(bin, 0o755);
+              candidates.forEach((file) => {
+                if (fs.existsSync(file)) fs.chmodSync(file, 0o755);
+              });
             }
-            console.log(`\nUnpacked into app/. Start the app with: npm start`);
+            const installed = candidates.find((file) => fs.existsSync(file));
+            if (!installed) {
+              console.error('\nUnpacked, but no mailsync binary showed up in app/ — check the tarball contents.');
+              process.exit(1);
+            }
+            console.log(`\nUnpacked ${path.relative(repoRoot, installed)} into app/. Start the app with: npm start`);
           });
         });
       });
