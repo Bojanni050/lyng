@@ -48,73 +48,82 @@ if (present && !force) {
   process.exit(0);
 }
 
-let hash = null;
-try {
-  const out = execSync('git submodule status ./mailsync', { cwd: repoRoot }).toString();
-  hash = (/[0-9a-f]{40}/.exec(out) || [])[0];
-} catch {
-  /* fall through to the index below */
-}
-if (!hash) {
-  try {
-    const out = execSync('git ls-tree HEAD mailsync', { cwd: repoRoot }).toString();
-    hash = (/\b[0-9a-f]{40}\b/.exec(out) || [])[0];
-  } catch {
-    /* ignore */
-  }
-}
-if (!hash) {
-  console.error('Could not determine the mailsync submodule commit (run this from the repo root).');
-  process.exit(1);
-}
+// Where to get the engine, in order of preference:
+//  1. an explicit override, for a hand-built binary
+//  2. this fork's own release artifact for this platform. Upstream's prebuilt for the pinned
+//     commit is deliberately not a fallback: it still carries the "mailspring" path gate, which
+//     a renamed build cannot satisfy, and it would be built from the wrong submodule anyway.
+const releasePlatform = {
+  'darwin-x64': 'macos',
+  'darwin-arm64': 'macos',
+  'win32-x64': 'win-ia32',
+  'win32-ia32': 'win-ia32',
+  'linux-x64': 'linux',
+  'linux-arm64': 'linux-arm64',
+}[`${process.platform}-${process.arch}`];
 
-const short = hash.slice(0, 8);
-const url = `https://mailspring-builds.s3.amazonaws.com/mailsync/${short}/${distDir}/mailsync.tar.gz`;
+const sources = [
+  process.env.MAILSPRING_MAILSYNC_URL,
+  `https://github.com/Bojanni050/Mailspring-Sync/releases/latest/download/mailsync-${releasePlatform}.tar.gz`,
+].filter(Boolean);
+
 const tarball = path.join(appDir, 'mailsync.tar.gz');
 
-console.log(`Downloading mailsync ${short} (${distDir}) from ${url}`);
+function unpack() {
+  targz.decompress({ src: tarball, dest: `${appDir}/` }, (err) => {
+    if (err) {
+      console.error(`\nUnpacking failed: ${err.message}`);
+      process.exit(1);
+    }
+    fs.rmSync(tarball, { force: true });
+    if (process.platform !== 'win32') {
+      candidates.forEach((file) => {
+        if (fs.existsSync(file)) fs.chmodSync(file, 0o755);
+      });
+    }
+    const installed = candidates.find((file) => fs.existsSync(file));
+    if (!installed) {
+      console.error('\nUnpacked, but no mailsync binary showed up in app/ — check the tarball contents.');
+      process.exit(1);
+    }
+    console.log(`\nUnpacked ${path.relative(repoRoot, installed)} into app/. Start the app with: npm start`);
+  });
+}
 
-function download(target, redirects = 0) {
+function trySource(index, target = sources[index], redirects = 0) {
+  if (!target) {
+    console.error(`\nNo engine artifact for ${process.platform}-${process.arch} (${releasePlatform}).`);
+    console.error('Either build it from the mailsync/ submodule, or point MAILSPRING_MAILSYNC_URL at a tarball.');
+    console.error('  https://github.com/Bojanni050/Mailspring-Sync/releases');
+    process.exit(1);
+  }
+  if (redirects === 0) console.log(`Trying ${target}`);
+
   https
-    .get(target, (res) => {
-      if ([301, 302, 307, 308].includes(res.statusCode) && res.headers.location && redirects < 5) {
+    // GitHub's release CDN answers 403 to requests without a User-Agent.
+    .get(target, { headers: { 'User-Agent': 'nuntio-fetch-mailsync' } }, (res) => {
+      if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location && redirects < 6) {
+        // GitHub answers /releases/latest/download/<asset> with a 302 to its CDN, so the
+        // Location header is the whole point — re-requesting the same URL just loops.
         res.resume();
-        return download(new URL(res.headers.location, target).toString(), redirects + 1);
+        return trySource(index, new URL(res.headers.location, target).toString(), redirects + 1);
       }
       if (res.statusCode !== 200) {
-        console.error(`\nDownload failed: HTTP ${res.statusCode}. The prebuilt for ${short}/${distDir} may not exist.`);
         res.resume();
-        process.exit(1);
+        console.log(`  HTTP ${res.statusCode} — next source`);
+        return trySource(index + 1);
       }
       const file = fs.createWriteStream(tarball);
       res.pipe(file);
       file.on('finish', () => {
-        file.close(() => {
-          targz.decompress({ src: tarball, dest: `${appDir}/` }, (err) => {
-            if (err) {
-              console.error(`\nUnpacking failed: ${err.message}`);
-              process.exit(1);
-            }
-            fs.rmSync(tarball, { force: true });
-            if (process.platform !== 'win32') {
-              candidates.forEach((file) => {
-                if (fs.existsSync(file)) fs.chmodSync(file, 0o755);
-              });
-            }
-            const installed = candidates.find((file) => fs.existsSync(file));
-            if (!installed) {
-              console.error('\nUnpacked, but no mailsync binary showed up in app/ — check the tarball contents.');
-              process.exit(1);
-            }
-            console.log(`\nUnpacked ${path.relative(repoRoot, installed)} into app/. Start the app with: npm start`);
-          });
-        });
+        file.close(unpack);
       });
     })
     .on('error', (err) => {
-      console.error(`\nDownload failed: ${err.message}`);
-      process.exit(1);
+      console.log(`  ${err.message} — next source`);
+      trySource(index + 1);
     });
 }
 
-download(url);
+trySource(0);
+

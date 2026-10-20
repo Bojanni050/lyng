@@ -31,10 +31,29 @@ weg waar de feature puur lokaal is, en vervangt de tracking-backend door een eig
 | `app/src/compile-cache-ts.js` | cache-write is best-effort | op Windows faalde de atomaire rename (EPERM) en nam de module-load mee |
 | `app/internal_packages/tracking-sync/` (nieuw) | poller die tellingen in `open_data`/`click_data` schrijft | de *writer* van die metadata zat op hun server |
 | `tracking-server/` (nieuw) | pixel, link-redirect, `/api/tracked`, Dockerfile | vervangt `link.getmailspring.com` |
-| `scripts/fetch-mailsync.js` (nieuw) | haalt de prebuilt sync-engine op | `npm install --ignore-scripts` slaat die stap over en de app start dan niet |
+| `scripts/fetch-mailsync.js` (nieuw) | haalt de engine op uit deze fork's release (of `MAILSPRING_MAILSYNC_URL`) | `npm install --ignore-scripts` slaat de download over en de app start dan niet |
+| `.gitmodules` + gitlink | submodule → `Bojanni050/Mailspring-Sync`, branch `nuntio-1.26` | de engine moet zonder de branding-gate gebouwd worden |
+| `mailsync/MailSync/main.cpp` (in de engine-fork) | `#ifndef DEBUG`-blok met de `"mailspring"`-padcheck verwijderd | die check laat elke hernoemde build met exit 2 sterven, wat de client alleen als "an unknown error has occurred mailsync: 2" kan tonen |
 
-Bewust **niet** aangeraakt: `mailspring-exports`, `Mailspring-Sync`, het `mailspring://`-protocol en
-de interne package-namen. Die zijn dragend; een volledige rename sloopt de build zonder winst.
+Bewust **niet** aangeraakt: `mailspring-exports`, `mailspring://`-protocol en de interne
+package-namen. Die zijn dragend; een volledige rename sloopt de build zonder winst.
+
+## De sync-engine (mailsync)
+
+De client start per account een C++-proces; zonder dat proces start de app niet. Upstream bouwt dat
+en publiceert de binary's, maar die bevatten een check die het proces weigert te starten als het pad
+naar de executable niet de tekst `mailspring` bevat (`main.cpp`, `return 2`). Daarom bouwt Nuntio de
+engine zelf uit een eigen submodule-fork:
+
+- Bron: <https://github.com/Bojanni050/Mailspring-Sync>, branch `nuntio-1.26` (GPL-3.0, gate eruit).
+- Kant-en-klaar: release [`engine-e35e421`](https://github.com/Bojanni050/Mailspring-Sync/releases/tag/engine-e35e421)
+  met `mailsync-win-ia32.tar.gz` (76 bestanden: `mailsync.exe`, `.pdb`, DLL's).
+- Ophalen: `npm run fetch-mailsync` — probeert eerst `MAILSPRING_MAILSYNC_URL`, dan het
+  release-artifact van jouw platform, en stopt met een duidelijke melding als er geen artifact is
+  (upstream's prebuilt wordt bewust **niet** meer als fallback gebruikt: verkeerde bron én de gate).
+- Zelf bouwen: de Windows-workflow in de engine-fork (`Actions → Build Windows → Run workflow`) of
+  lokaal met Visual Studio 2022 + vcpkg en `msbuild Windows\mailsync.sln /p:Configuration=Release;Platform=Win32`.
+  Voor Linux/macOS bestaat er nog géén artifact; die workflow (`build.yml`) moet dan eerst draaien.
 
 ## Wat werkt, en wat niet
 
