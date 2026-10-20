@@ -4,13 +4,18 @@ import * as OnboardingActions from './onboarding-actions';
 /**
  * Replaces the vendor's onboarding webview.
  *
- * Upstream loads `${identityServer}/onboarding?...` in a Webview, so the first-run screens —
- * including the "Disable Cloud Features?" step — are HTML served by id.getmailspring.com.
- * This fork has no identity server: the pro features run locally, which makes that page both
- * a remote dependency and, here, untrue (nothing gets disabled by skipping it).
+ * Upstream loads `${identityServer}/onboarding?...` in a Webview, so the first-run screens are
+ * HTML served by the vendor's identity service — including a step threatening to disable features
+ * unless you create an account. Nuntio has no identity server and no cloud: that page would be a
+ * remote dependency, and its warning would be false here, so the step is local and describes what
+ * this build can actually do.
  *
  * The onboarding store only needs one thing from this page: identityJSONReceived with
- * `{ skipped: true }` clears any stored identity and moves on to account setup.
+ * `{ skipped: true }` clears any stored identity and moves on to account setup. The copy never
+ * mentions the upstream product by name — users of this build should not have to care about it.
+ *
+ * Layout lives in styles/onboarding.less under `.page.identity-skip`; `.page.authenticate` is
+ * left alone because upstream's rule assumes a webview child that fills the page.
  */
 export default class AuthenticatePage extends React.Component<{ account?: object }> {
   static displayName = 'AuthenticatePage';
@@ -21,27 +26,39 @@ export default class AuthenticatePage extends React.Component<{ account?: object
 
   render() {
     return (
-      <div className="page authenticate">
-        <div className="steps-container">
-          <h1 style={{ marginTop: 120 }}>{localized('No Mailspring ID needed')}</h1>
-          <p className="hero-text" style={{ fontSize: 16, maxWidth: 620, margin: '20px auto 0' }}>
+      <div className="page identity-skip">
+        <div className="content">
+          <h1>{localized('No account, no cloud')}</h1>
+          <p className="lede">
             {localized(
-              'This is a self-built fork. It never talks to Mailspring’s servers, so there is no Mailspring ID and no cloud metadata storage.'
+              'Nuntio keeps your mail on this machine. No sign-up, no subscription — here is what works right away.'
             )}
           </p>
-          <p style={{ maxWidth: 620, margin: '28px auto 0', textAlign: 'left', lineHeight: 1.7 }}>
-            {localized(
-              'Available locally: snooze, send later, send reminders, activity, undo send, and open/link tracking through your own tracking server.'
-            )}
-          </p>
-          <p style={{ maxWidth: 620, margin: '12px auto 0', textAlign: 'left', lineHeight: 1.7 }}>
-            {localized(
-              'Still off: message translation, contact enrichment and thread sharing — those need a server component this fork does not ship.'
-            )}
-          </p>
+          <div className="feature-columns">
+            <div className="feature-column">
+              <h4>{localized('Works right away')}</h4>
+              <ul>
+                <li>{localized('Unified inbox, search, rules, templates')}</li>
+                <li>{localized('Snooze, send later, reminders, undo send')}</li>
+                <li>{localized('Open and link tracking via your own server')}</li>
+                <li>{localized('Activity, signatures, multiple accounts')}</li>
+              </ul>
+            </div>
+            <div className="feature-column">
+              <h4>{localized('Not in this build')}</h4>
+              <ul>
+                <li>{localized('Message translation')}</li>
+                <li>{localized('Contact and company profiles')}</li>
+                <li>{localized('Thread sharing')}</li>
+              </ul>
+              <p className="note">
+                {localized('These need a server component that this build does not include.')}
+              </p>
+            </div>
+          </div>
         </div>
         <div className="footer">
-          <button key="next" className="btn btn-large btn-continue" onClick={this._onContinue}>
+          <button className="btn btn-large btn-emphasis btn-continue" onClick={this._onContinue}>
             {localized('Continue')}
           </button>
         </div>
