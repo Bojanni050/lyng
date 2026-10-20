@@ -152,7 +152,7 @@ function mailspringTemplateFor(domain: string, provider: string) {
 function applyContainerFolderDefault(populated: Account) {
   const containerFolderDefault = AccountStore.containerFolderDefaultGetter();
   if (
-    containerFolderDefault !== 'Nuntio' &&
+    containerFolderDefault !== 'Mailspring' &&
     (populated.settings.container_folder === '' ||
       populated.settings.container_folder === undefined)
   ) {

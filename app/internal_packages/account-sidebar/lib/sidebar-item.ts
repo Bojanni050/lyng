@@ -206,7 +206,7 @@ function detectFolderSeparator(accountId: string): string {
   // Check category paths for known prefixes — most reliable signal
   for (const cat of CategoryStore.categories(accountId)) {
     const catPath = cat.path;
-    for (const prefix of ['INBOX', '[Gmail]', '[Nuntio]', 'Nuntio']) {
+    for (const prefix of ['INBOX', '[Gmail]', '[Mailspring]', 'Mailspring']) {
       if (catPath.startsWith(prefix) && catPath.length > prefix.length) {
         const ch = catPath[prefix.length];
         if (ch === '.' || ch === '/' || ch === '\\') return ch;

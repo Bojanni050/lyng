@@ -3,7 +3,7 @@
 // `@mailspring/view`, applies the host theme to the document, then mounts the default export.
 (function () {
   const moduleGlobals = Object.assign({}, window.__mailspringViewModuleGlobals, {
-    '@mailspring/view': 'NuntioView',
+    '@mailspring/view': 'MailspringView',
   });
 
   function viewRequire(specifier) {

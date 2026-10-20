@@ -35,6 +35,19 @@ const SKIP = [
   'Mailspring-Theme-Starter',
 ];
 
+// Literals that are identifiers or are compared against stored/server data, never shown as copy.
+// Renaming one of these silently breaks a lookup: `MailspringAPIRequest` is registered under that
+// exact name in the global shim, and the folder prefixes below are matched against IMAP paths.
+const PROTECTED = {
+  'app/src/global/mailspring-exports.js': ['MailspringAPIRequest', 'MailspringTestUtils'],
+  'app/internal_packages/views/runtime/loader.js': ['MailspringView'],
+  'app/internal_packages/account-sidebar/lib/sidebar-item.ts': ['[Mailspring]', 'Mailspring'],
+  'app/internal_packages/onboarding/lib/onboarding-helpers.ts': ['Mailspring'],
+};
+
+// A bare identifier has no space in it, so it is a key or a module name — never prose.
+const BARE_IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+
 const STRING_KINDS = new Set([
   ts.SyntaxKind.StringLiteral,
   ts.SyntaxKind.NoSubstitutionTemplateLiteral,
@@ -65,7 +78,14 @@ function editsFor(file) {
       const start = node.getStart(sf);
       const end = node.getEnd();
       const raw = text.slice(start, end);
-      if (raw.includes(FROM) && !SKIP.some((skip) => raw.includes(skip))) {
+      const value = raw.replace(/^[`'"]|[`'"]$/g, '');
+      const protectedHere = PROTECTED[path.relative(process.cwd(), file)] || [];
+      const skip =
+        !raw.includes(FROM) ||
+        SKIP.some((marker) => raw.includes(marker)) ||
+        BARE_IDENTIFIER.test(value) ||
+        protectedHere.includes(value);
+      if (!skip) {
         edits.push({ start, end, next: raw.split(FROM).join(TO) });
       }
       continue;
