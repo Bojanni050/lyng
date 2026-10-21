@@ -352,9 +352,7 @@ export default class ThemeManager {
     } else if (ext === '.css') {
       return fs.readFileSync(stylesheetPath, 'utf8');
     } else {
-      throw new Error(
-        localized(`Nuntio does not support stylesheets with the extension: %@`, ext)
-      );
+      throw new Error(localized(`Nuntio does not support stylesheets with the extension: %@`, ext));
     }
   }
 

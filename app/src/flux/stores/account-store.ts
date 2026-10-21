@@ -127,9 +127,7 @@ class _AccountStore extends MailspringStore {
     });
 
     if (message && AppEnv.isMainWindow()) {
-      AppEnv.showErrorDialog(
-        `Nuntio was unable to load your account preferences.\n\n${message}`
-      );
+      AppEnv.showErrorDialog(`Nuntio was unable to load your account preferences.\n\n${message}`);
     }
   };
 

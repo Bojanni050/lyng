@@ -29,9 +29,7 @@ export function shareVersionProblem(apiVersion: string): string | null {
         'This View was built for an older version of Nuntio, so it can’t be installed. Ask whoever shared it to update it and share it again.'
       );
     case 'too-new':
-      return localized(
-        'This View needs a newer version of Nuntio. Update Nuntio to install it.'
-      );
+      return localized('This View needs a newer version of Nuntio. Update Nuntio to install it.');
     default:
       return null;
   }
