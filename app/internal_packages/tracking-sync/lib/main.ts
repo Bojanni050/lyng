@@ -24,6 +24,7 @@ type ClickData = { recipient: string; timestamp: number };
 
 type ServerMessage = {
   messageId: string;
+  accountId?: string | null;
   opens: number;
   openData: ClickData[];
   links: { index: number; clickCount: number; clickData: ClickData[] }[];
@@ -93,7 +94,9 @@ function messagesFor(headerMessageId: string): Promise<Message[]> {
 
 function sameData(a: ClickData[] = [], b: ClickData[] = []) {
   if (a.length !== b.length) return false;
-  return a.every((entry, i) => entry.recipient === b[i].recipient && entry.timestamp === b[i].timestamp);
+  return a.every(
+    (entry, i) => entry.recipient === b[i].recipient && entry.timestamp === b[i].timestamp
+  );
 }
 
 async function applyOpenTracking(entry: ServerMessage, message: Message) {
@@ -120,7 +123,10 @@ async function applyLinkTracking(entry: ServerMessage, message: Message) {
   const links = metadata.links.map((link, index) => {
     const remote = (entry.links || []).find((candidate) => candidate.index === index);
     if (!remote) return link;
-    if ((link.click_count || 0) === remote.clickCount && sameData(link.click_data || [], remote.clickData)) {
+    if (
+      (link.click_count || 0) === remote.clickCount &&
+      sameData(link.click_data || [], remote.clickData)
+    ) {
       return link;
     }
     changed = true;
@@ -145,7 +151,10 @@ export async function pollOnce() {
     const entries: ServerMessage[] = (payload && payload.messages) || [];
     for (const entry of entries) {
       const messages = await messagesFor(entry.messageId);
-      const message = messages.find((candidate) => !candidate.draft);
+      const message = messages.find(
+        (candidate) =>
+          !candidate.draft && (entry.accountId == null || candidate.accountId === entry.accountId)
+      );
       if (!message) continue;
       await applyOpenTracking(entry, message);
       await applyLinkTracking(entry, message);
