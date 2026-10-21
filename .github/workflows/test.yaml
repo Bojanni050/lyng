@@ -56,5 +56,15 @@ jobs:
         run: npm run fetch-mailsync
 
       - name: Run tests
-        run: npm test
+        run: npm test -- --junit-xml=tmp-junit
         timeout-minutes: 25
+
+      # The console reporter's output is too noisy to read from a log, so the
+      # JUnit XML is the artifact to look at when this job fails.
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-results
+          path: tmp-junit
+          if-no-files-found: ignore
