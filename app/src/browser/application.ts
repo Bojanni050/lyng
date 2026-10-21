@@ -123,6 +123,16 @@ export default class Application extends EventEmitter {
       const mailsync = new MailsyncProcess(options);
       await mailsync.migrate();
     } catch (err) {
+      // showMessageBoxSync blocks the main process indefinitely under xvfb because
+      // nothing can dismiss the dialog, turning a missing or incompatible engine into
+      // a 20 minute CI timeout with no output. Spec runs report and exit instead,
+      // matching the theme error handler further down.
+      if (this.specMode) {
+        console.error(`Nuntio could not run the mailsync migration: ${err}`);
+        app.exit(1);
+        return;
+      }
+
       let message = null;
       let buttons = [localized('Quit')];
       if (err.toString().includes('ENOENT')) {
