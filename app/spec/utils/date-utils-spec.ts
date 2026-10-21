@@ -1,7 +1,19 @@
 import moment from 'moment';
 import { DateUtils } from 'mailspring-exports';
 
+// These expectations are written in English. DateUtils formats through Intl with
+// navigator.language, so a Dutch machine would render "24 oktober 1982 om 22:45:00"
+// while the assertions below expect "October 24, 1982 at 22:45:00".
 describe('DateUtils', function dateUtils() {
+  beforeEach(() => {
+    Object.defineProperty(navigator, 'language', { value: 'en-US', configurable: true });
+    moment.locale('en');
+  });
+  afterEach(() => {
+    delete (navigator as any).language;
+    moment.locale('en');
+  });
+
   describe('nextWeek', () => {
     it('returns tomorrow if now is sunday', () => {
       const sunday = moment('03-06-2016', 'MM-DD-YYYY');

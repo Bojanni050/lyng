@@ -44,6 +44,10 @@ describe('view-sandbox-policy', () => {
   describe('containedFile', () => {
     let root: string;
     let outside: string;
+    // Windows refuses file symlinks unless Developer Mode or elevation grants the privilege.
+    // Directory junctions do not need it, so containment is still asserted for those.
+    let fileSymlinkSupported = false;
+    let dirSymlinkSupported = false;
 
     beforeEach(() => {
       const base = fs.mkdtempSync(path.join(os.tmpdir(), 'view-policy-'));
@@ -53,8 +57,24 @@ describe('view-sandbox-policy', () => {
       fs.mkdirSync(outside);
       fs.writeFileSync(path.join(root, 'sub', 'ok.js'), '1');
       fs.writeFileSync(path.join(outside, 'secret.txt'), 'secret');
-      fs.symlinkSync(path.join(outside, 'secret.txt'), path.join(root, 'link.txt'));
-      fs.symlinkSync(outside, path.join(root, 'linkdir'));
+
+      fileSymlinkSupported = true;
+      try {
+        fs.symlinkSync(path.join(outside, 'secret.txt'), path.join(root, 'link.txt'));
+      } catch (error) {
+        fileSymlinkSupported = false;
+      }
+
+      dirSymlinkSupported = true;
+      try {
+        fs.symlinkSync(
+          outside,
+          path.join(root, 'linkdir'),
+          process.platform === 'win32' ? 'junction' : 'dir'
+        );
+      } catch (error) {
+        dirSymlinkSupported = false;
+      }
     });
 
     it('resolves files inside the root', () => {
@@ -73,8 +93,20 @@ describe('view-sandbox-policy', () => {
     });
 
     it('rejects symlinks that point outside the root', () => {
-      expect(containedFile(root, 'link.txt')).toBe(null);
-      expect(containedFile(root, 'linkdir/secret.txt')).toBe(null);
+      if (!fileSymlinkSupported) {
+        console.warn(
+          'Skipping file-symlink containment check: this machine cannot create symlinks without Developer Mode or administrator rights.'
+        );
+      } else {
+        expect(containedFile(root, 'link.txt')).toBe(null);
+      }
+      if (!dirSymlinkSupported) {
+        console.warn(
+          'Skipping directory-symlink containment check: this machine cannot create directory links.'
+        );
+      } else {
+        expect(containedFile(root, 'linkdir/secret.txt')).toBe(null);
+      }
     });
   });
 

@@ -11,6 +11,12 @@ import {
 } from '../../src/calendar-date';
 import { holdGlides } from '../fixtures/hold-glides';
 
+// Same reason as mini-month-view-spec: the ambient locale decides the first day of the week,
+// and these expectations describe an English/Sunday-start calendar. Pin it so the suite does not
+// depend on the machine's language, then restore.
+beforeEach(() => moment.locale('en'));
+afterEach(() => moment.locale('en'));
+
 // Rows start on the locale's first day of the week, so expectations are built the same way.
 const weekOf = (y: number, m: number, d: number) =>
   moment([y, m - 1, d])

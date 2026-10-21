@@ -1,0 +1,5 @@
+# Spec fixtures are compared byte-for-byte, so they must keep the LF endings they
+# were recorded with. Without this, a Windows checkout with core.autocrlf=true
+# rewrites them to CRLF and the tests fail on line-ending differences alone.
+app/spec/fixtures/** text eol=lf
+app/spec/services/autolinker-fixtures/** text eol=lf

@@ -5,6 +5,12 @@ import { act, cleanup, render } from '@testing-library/react';
 
 import { MiniMonthView } from '../../src/components/mini-month-view';
 
+// date-utils.ts calls moment.locale(navigator.language) at import time, so on a machine whose
+// language is not English the global locale is whatever the environment says. The month names
+// below are English, so pin the locale instead of inheriting it from the machine.
+beforeEach(() => moment.locale('en'));
+afterEach(() => moment.locale('en'));
+
 describe('MiniMonthView', () => {
   afterEach(cleanup);
 
