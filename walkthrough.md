@@ -1,0 +1,5 @@
+## 2026-10-21 (CI and fork safety)
+
+- Findings: CI only ran on `master`, while the active branch is `main`; fork-specific safeguards could be silently reverted; postinstall still fetched an upstream mailsync binary whose path gate prevents Nuntio from starting.
+- Conclusions: Run CI on both branch names and cancel superseded runs; enforce the fork-specific assumptions with a fast, dependency-free failing check; never fetch the upstream engine as a fallback, and point contributors to the fork release or local submodule build instead.
+- Actions: Updated `.github/workflows/test.yaml`, `package.json`, `scripts/check-fork-invariants.js`, `scripts/postinstall.js`, `scripts/fetch-mailsync.js`, and `NUNTIO.md`; added this walkthrough entry. The invariant check passes all 14 checks, a simulated broken updater invariant exits non-zero, JavaScript syntax and workflow YAML parse checks pass, and the direct TypeScript compiler check passes. `npm run lint:check` still reports pre-existing formatting issues in untouched files; validated.

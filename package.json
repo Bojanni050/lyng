@@ -74,6 +74,7 @@
   },
   "scripts": {
     "postinstall": "node scripts/postinstall.js",
+    "check:fork": "node scripts/check-fork-invariants.js",
     "fetch-mailsync": "node scripts/fetch-mailsync.js",
     "start": "electron ./app --enable-logging --dev",
     "build:fm-helper": "swift build -c release --arch arm64 --package-path app/native/mailspring-fm",

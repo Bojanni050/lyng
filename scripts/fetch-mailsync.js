@@ -3,10 +3,9 @@
 /**
  * Downloads the prebuilt mailsync binary for the current platform into app/.
  *
- * `npm install` already does this, but only when the mailsync submodule is absent AND the
- * root postinstall actually ran. If you installed with --ignore-scripts, or the postinstall
- * died earlier on another dependency, the app starts and immediately shows
- * "Mailspring could not find the mailsync process" — this script is the missing step alone.
+ * The root postinstall prints a reminder when the engine is missing but does not download
+ * upstream binaries: those contain a path gate that prevents Nuntio from starting.
+ * Run this script to fetch this fork's release, or build the engine from the submodule.
  *
  *   node scripts/fetch-mailsync.js            # download if app/mailsync is missing
  *   node scripts/fetch-mailsync.js --force    # always re-download

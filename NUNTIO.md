@@ -31,7 +31,8 @@ weg waar de feature puur lokaal is, en vervangt de tracking-backend door een eig
 | `app/src/compile-cache-ts.js` | cache-write is best-effort | op Windows faalde de atomaire rename (EPERM) en nam de module-load mee |
 | `app/internal_packages/tracking-sync/` (nieuw) | poller die tellingen in `open_data`/`click_data` schrijft | de *writer* van die metadata zat op hun server |
 | `tracking-server/` (nieuw) | pixel, link-redirect, `/api/tracked`, Dockerfile | vervangt `link.getmailspring.com` |
-| `scripts/fetch-mailsync.js` (nieuw) | haalt de engine op uit deze fork's release (of `MAILSPRING_MAILSYNC_URL`) | `npm install --ignore-scripts` slaat de download over en de app start dan niet |
+| `scripts/fetch-mailsync.js` (nieuw) | haalt de engine op uit deze fork's release (of `MAILSPRING_MAILSYNC_URL`) | biedt een expliciete route naar de fork-binary; upstreams binary is onbruikbaar |
+| `scripts/postinstall.js` | downloadt geen upstream-mailsync meer; meldt hoe je de fork-engine ophaalt/bouwt | upstreams binary heeft de Nuntio-blokkerende padcheck |
 | `.gitmodules` + gitlink | submodule → `Bojanni050/Mailspring-Sync`, branch `nuntio-1.26` | de engine moet zonder de branding-gate gebouwd worden |
 | `mailsync/MailSync/main.cpp` (in de engine-fork) | `#ifndef DEBUG`-blok met de `"mailspring"`-padcheck verwijderd | die check laat elke hernoemde build met exit 2 sterven, wat de client alleen als "an unknown error has occurred mailsync: 2" kan tonen |
 
@@ -70,6 +71,7 @@ mail-functionaliteit (IMAP/SMTP, regels, sjablonen, zoeken).
 
 ```bash
 npm install                       # Node 22 (node-llama-cpp gebruikt JSON-import-attributes)
+npm run fetch-mailsync            # haalt de fork-engine op als die nog ontbreekt
 npm start                         # electron ./app --dev
 ```
 
