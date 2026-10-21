@@ -1,0 +1,24 @@
+{
+  "name": "dictation",
+  "version": "0.1.0",
+  "main": "./lib/main",
+
+  "isOptional": true,
+  "isIdentityRequired": false,
+
+  "title": "Dictation",
+  "description": "Dictate messages in the composer with the speech-to-text provider configured in Preferences.",
+  "license": "GPL-3.0",
+  "engines": {
+    "mailspring": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bojanni050/nuntio"
+  },
+  "windowTypes": {
+    "default": true,
+    "composer": true,
+    "thread-popout": true
+  }
+}

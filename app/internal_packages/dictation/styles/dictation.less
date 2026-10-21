@@ -1,0 +1,49 @@
+@import 'ui-variables';
+
+.dictation-composer-button {
+  display: inline-flex;
+  align-items: center;
+  order: 0;
+}
+
+.dictation-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 10px;
+  padding-right: 10px;
+
+  &.recording {
+    color: @color-error;
+    background-color: mix(@background-primary, @color-error, 90%);
+  }
+
+  &.transcribing {
+    opacity: 0.65;
+  }
+
+  .dictation-label {
+    font-size: @font-size-small;
+    white-space: nowrap;
+  }
+}
+
+.dictation-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  color: @color-error;
+  font-size: @font-size-small;
+  max-width: 320px;
+}
+
+.dictation-dismiss {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: @font-size-large;
+  line-height: 1;
+  padding: 0 2px;
+}

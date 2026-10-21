@@ -37,6 +37,7 @@ import { MailsyncProcess } from '../mailsync-process';
 import Config from '../config';
 import { registerQuickpreviewIPCHandlers } from './quickpreview-ipc';
 import { registerLocalAIIPCHandlers } from './local-ai-service';
+import { allowMicrophoneInAppWindows } from './microphone-permission';
 import { registerViewSessionIPCHandlers } from './view-sessions';
 import { guardAuxiliaryWindowNavigation } from './auxiliary-window-guard';
 import { onFromMailspringWindows, handleFromMailspringWindows } from './trusted-ipc';
@@ -985,6 +986,7 @@ export default class Application extends EventEmitter {
     registerQuickpreviewIPCHandlers(ipcMain);
     registerNotificationIPCHandlers(ipcMain);
     registerViewSessionIPCHandlers(ipcMain);
+    allowMicrophoneInAppWindows();
     registerLocalAIIPCHandlers(ipcMain, {
       configDirPath: this.configDirPath,
       config: this.config,
