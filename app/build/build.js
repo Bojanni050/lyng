@@ -44,7 +44,12 @@ function dependencyClosure(rootPackage) {
     }
   };
   visit(rootPackage, appDir);
-  return [...found].map((pkgDir) => path.relative(path.join(appDir, 'node_modules'), pkgDir));
+  // asar globs and scoped package names use forward slashes on every platform, but
+  // path.relative returns backslashes on Windows — which silently stopped the scoped
+  // `@node-llama-cpp/*` patterns from matching there.
+  return [...found].map((pkgDir) =>
+    path.relative(path.join(appDir, 'node_modules'), pkgDir).split(path.sep).join('/')
+  );
 }
 
 const sourceGlobs = [
@@ -245,6 +250,50 @@ async function runUploadSourceMapsToSentry({ buildPath }) {
   }
 }
 
+const packagingArch = {
+  win32: 'x64',
+  darwin: process.env.OVERRIDE_TO_INTEL ? 'x64' : process.arch,
+  linux: process.arch,
+}[platform];
+
+// node-llama-cpp installs one native-binary package per platform, arch and compute layer
+// (@node-llama-cpp/win-x64, win-x64-vulkan, win-x64-cuda, win-x64-cuda-ext, win-arm64, ...),
+// and npm installs every variant that matches the build machine. Unpacking the whole
+// dependency closure therefore shipped all of them — on Windows that was 631 MB, of which the
+// CUDA variants alone were 519 MB. Keep the CPU package plus one accelerated layer
+// (Vulkan on Windows and Linux, Metal on Apple silicon) and drop everything else. Missing
+// binary packages are not fatal: compileLLamaCpp.getBinariesPathFromModules returns null and
+// getLlama falls back to the next compute layer, so dropping CUDA only costs CUDA
+// acceleration, not local AI. Add 'cuda' here if a build should ship it again.
+const LLAMA_ACCELERATED_LAYER = { win32: 'vulkan', linux: 'vulkan', darwin: 'metal' }[platform];
+
+function llamaPackagesForTarget(closure) {
+  const osName = { win32: 'win', darwin: 'mac', linux: 'linux' }[platform];
+  const keepPrefix = `${osName}-${packagingArch}`;
+  return closure.filter((dir) => {
+    const scoped = /^@node-llama-cpp\/(.+)$/.exec(dir);
+    if (!scoped) return true;
+    const variant = scoped[1];
+    if (!variant.startsWith(keepPrefix)) return false;
+    if (variant.includes('cuda')) return false;
+    if (variant.includes('-vulkan') && LLAMA_ACCELERATED_LAYER !== 'vulkan') return false;
+    if (variant.includes('-metal') && LLAMA_ACCELERATED_LAYER !== 'metal') return false;
+    return true;
+  });
+}
+
+// Filtering the asar unpack list is not enough to leave a variant out of the build: the
+// `*.dll` / `*.node` unpack globs pull native files out of every package that is still
+// *included*, so the dropped variants have to be ignored outright.
+const llamaClosure = dependencyClosure('node-llama-cpp');
+const llamaKeptPackages = llamaPackagesForTarget(llamaClosure);
+const llamaDroppedPackages = llamaClosure.filter(
+  (dir) => !llamaKeptPackages.includes(dir) && dir.startsWith('@node-llama-cpp/')
+);
+const llamaDropPatterns = llamaDroppedPackages.map(
+  (dir) => new RegExp(`^/node_modules/${dir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`)
+);
+
 function buildPackagerOptions() {
   // See: https://github.com/electron-userland/electron-packager/blob/master/usage.txt
   return {
@@ -257,11 +306,7 @@ function buildPackagerOptions() {
     dir: appDir,
     appCategoryType: 'public.app-category.business',
     tmpdir,
-    arch: {
-      win32: 'x64',
-      darwin: process.env.OVERRIDE_TO_INTEL ? 'x64' : process.arch,
-      linux: process.arch,
-    }[platform],
+    arch: packagingArch,
     icon: {
       darwin: path.resolve(appDir, 'build', 'resources', 'mac', 'mailspring.icns'),
       win32: path.resolve(appDir, 'build', 'resources', 'win', 'mailspring-square.ico'),
@@ -280,7 +325,6 @@ function buildPackagerOptions() {
           '*.so',
           '*.so.*',
           '*.dll',
-          '*.pdb',
           '*.node',
           // Windows tray icons: Electron loads .ico via LoadImage, which needs a real
           // file on disk rather than a copy extracted from the asar on every change.
@@ -293,7 +337,7 @@ function buildPackagerOptions() {
           // utility process. It is ESM with native binaries, so the worker, the package and
           // everything it imports live on disk and are imported from app.asar.unpacked.
           '**/src/browser/local-ai-worker.js',
-          ...dependencyClosure('node-llama-cpp').map((dir) => `**/node_modules/${dir}/**`),
+          ...llamaKeptPackages.map((dir) => `**/node_modules/${dir}/**`),
           '**/static/all_licenses.html',
           '**/static/extensions/**',
           '**/node_modules/spellchecker/**',
@@ -301,6 +345,7 @@ function buildPackagerOptions() {
         '}',
     },
     ignore: [
+      ...llamaDropPatterns,
       // top level dirs we never want
       /^\/build.*/,
       /^\/dist.*/,
@@ -330,6 +375,9 @@ function buildPackagerOptions() {
       /\.mk/,
       /\.dYSM$/,
       /\.map$/,
+      // Debug symbols: ~30 MB in the Windows build (mailsync.pdb, mailcore2.pdb, libetpan.pdb)
+      // and only useful when debugging a crash against a matching build.
+      /\.pdb$/i,
       // specific (large) module bits we know we don't need
       /node_modules[/]+less[/]+dist$/,
       /node_modules[/]+react[/]+dist$/,
@@ -397,8 +445,9 @@ function buildPackagerOptions() {
     extendInfo: path.resolve(appDir, 'build', 'resources', 'mac', 'extra.plist'),
     extraResource:
       platform === 'darwin'
-        ? [path.resolve(appDir, 'build', 'resources', 'mac', 'new-mail.mp3'), fmHelperPath]
-            .filter(Boolean)
+        ? [path.resolve(appDir, 'build', 'resources', 'mac', 'new-mail.mp3'), fmHelperPath].filter(
+            Boolean
+          )
         : undefined,
     appBundleId: 'com.mailspring.mailspring',
     afterCopy: [
