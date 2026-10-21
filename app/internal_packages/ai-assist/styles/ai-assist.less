@@ -1,0 +1,28 @@
+@import 'ui-variables';
+
+.ai-assist-bar {
+  margin: 0 0 10px;
+  padding: 6px 8px;
+  border: 1px solid @border-color-secondary;
+  border-radius: @border-radius-base;
+  background: @background-secondary;
+
+  .ai-assist-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .ai-assist-summary {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid @border-color-secondary;
+    color: @text-color;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+  .ai-assist-error {
+    margin-top: 8px;
+    color: @color-error;
+  }
+}

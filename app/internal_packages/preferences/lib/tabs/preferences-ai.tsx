@@ -10,13 +10,16 @@ import {
   normalizeBaseUrl,
   presetFor,
 } from '../../../../src/ai/provider-catalog';
+import { AI_CONFIG_KEYS, ChatConfig } from '../../../../src/ai/config';
+import { testChatProvider } from '../../../../src/ai/completion';
 import { ConfigLike } from '../types';
 import ModelPicker from './model-picker';
+import PreferencesTTS from './preferences-tts';
 
-const PROVIDER_KEY = 'core.ai.provider';
-const BASE_URL_KEY = 'core.ai.baseUrl';
-const API_KEY = 'core.ai.apiKey';
-const MODEL_KEY = 'core.ai.model';
+const PROVIDER_KEY = AI_CONFIG_KEYS.provider;
+const BASE_URL_KEY = AI_CONFIG_KEYS.baseUrl;
+const API_KEY = AI_CONFIG_KEYS.apiKey;
+const MODEL_KEY = AI_CONFIG_KEYS.model;
 
 const CUSTOM_PROVIDER = 'custom';
 
@@ -30,6 +33,9 @@ type PreferencesAIState = {
   error: string | null;
   revealKey: boolean;
   showAllModels: boolean;
+  testing: boolean;
+  testStatus: string | null;
+  testError: string | null;
 };
 
 /**
@@ -44,6 +50,7 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
   static displayName = 'PreferencesAI';
 
   private _fetchController: AbortController | null = null;
+  private _testController: AbortController | null = null;
 
   constructor(props: { config: ConfigLike }) {
     super(props);
@@ -62,6 +69,9 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
       error: null,
       revealKey: false,
       showAllModels: false,
+      testing: false,
+      testStatus: null,
+      testError: null,
     };
   }
 
@@ -75,6 +85,7 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
 
   componentWillUnmount() {
     this._fetchController?.abort();
+    this._testController?.abort();
   }
 
   _setConfig(key: string, value: string) {
@@ -113,8 +124,51 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
 
   _onModelChange = (modelId: string) => {
     this._setConfig(MODEL_KEY, modelId);
-    this.setState({ model: modelId });
+    this.setState({ model: modelId, testStatus: null, testError: null });
   };
+
+  _config(): ChatConfig {
+    return {
+      provider: this.state.provider,
+      baseUrl: this.state.baseUrl,
+      apiKey: this.state.apiKey,
+      model: this.state.model,
+    };
+  }
+
+  _onTestProvider = () => {
+    this._testProvider();
+  };
+
+  async _testProvider() {
+    if (this.state.testing) return;
+    this._testController?.abort();
+    const controller = new AbortController();
+    this._testController = controller;
+    this.setState({ testing: true, testStatus: null, testError: null });
+
+    try {
+      const result = await testChatProvider(this._config(), controller.signal);
+      if (controller.signal.aborted) return;
+      this.setState({
+        testing: false,
+        testStatus: localized(
+          'The model replied “%@” in %@ ms.',
+          result.reply.slice(0, 40),
+          String(result.elapsedMs)
+        ),
+      });
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      this.setState({
+        testing: false,
+        testError:
+          error instanceof AIProviderError
+            ? error.message
+            : localized('Something went wrong while testing the provider.'),
+      });
+    }
+  }
 
   _onFetchModels = () => {
     this._fetchModels();
@@ -320,6 +374,27 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
             ) : null}
           </div>
         ) : null}
+
+        <div className="item ai-fetch-row">
+          <button
+            type="button"
+            className="btn"
+            disabled={
+              this.state.testing || !this.state.baseUrl || !this.state.apiKey || !this.state.model
+            }
+            onClick={this._onTestProvider}
+          >
+            {this.state.testing ? localized('Testing…') : localized('Test provider')}
+          </button>
+          <span className="ai-fetch-status">
+            {this.state.testStatus || this.state.testError
+              ? this.state.testStatus || this.state.testError
+              : localized('Sends one tiny prompt so you know the key and model work.')}
+          </span>
+        </div>
+        {this.state.testError && this.state.testStatus ? (
+          <div className="ai-error">{this.state.testError}</div>
+        ) : null}
       </section>
     );
   }
@@ -327,8 +402,11 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
   render() {
     return (
       <div className="preferences-ai">
-        {this._renderProviderSection()}
-        {this._renderModelSection()}
+        <div className="ai-chat-section">
+          {this._renderProviderSection()}
+          {this._renderModelSection()}
+        </div>
+        <PreferencesTTS config={this.props.config} />
       </div>
     );
   }

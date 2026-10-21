@@ -1,0 +1,24 @@
+{
+  "name": "ai-assist",
+  "version": "0.1.0",
+  "main": "./lib/main",
+
+  "isOptional": true,
+  "isIdentityRequired": false,
+
+  "title": "AI Assist",
+  "description": "Summarize a message or have it read aloud, using the AI provider configured in Preferences.",
+
+  "license": "GPL-3.0",
+  "engines": {
+    "mailspring": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bojanni050/nuntio"
+  },
+  "windowTypes": {
+    "default": true,
+    "thread-popout": true
+  }
+}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, cleanup } from '@testing-library/react';
+import { render, fireEvent, cleanup, within } from '@testing-library/react';
 
 import PreferencesAI from '../lib/tabs/preferences-ai';
 
@@ -109,7 +109,9 @@ describe('PreferencesAI', function () {
       <PreferencesAI config={config as any} />
     );
 
-    fireEvent.click(getByText('Fetch models'));
+    fireEvent.click(
+      within(container.querySelector('.ai-chat-section') as HTMLElement).getByText('Fetch models')
+    );
     await settle();
 
     expect(seenUrl).toBe('https://api.deepinfra.com/v1/openai/models');
@@ -135,10 +137,10 @@ describe('PreferencesAI', function () {
     (window as any).fetch = () =>
       Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(modelsResponse) });
 
-    const { container, getByText, queryByText } = render(
-      <PreferencesAI config={buildConfig() as any} />
+    const { container, queryByText } = render(<PreferencesAI config={buildConfig() as any} />);
+    fireEvent.click(
+      within(container.querySelector('.ai-chat-section') as HTMLElement).getByText('Fetch models')
     );
-    fireEvent.click(getByText('Fetch models'));
     await settle();
 
     // Rows only exist while the picker is open, so open it before checking the list.
@@ -157,8 +159,10 @@ describe('PreferencesAI', function () {
     (window as any).fetch = () =>
       Promise.resolve({ ok: false, status: 401, json: () => Promise.resolve({}) });
 
-    const { getByText, queryByText } = render(<PreferencesAI config={buildConfig() as any} />);
-    fireEvent.click(getByText('Fetch models'));
+    const { container, queryByText } = render(<PreferencesAI config={buildConfig() as any} />);
+    fireEvent.click(
+      within(container.querySelector('.ai-chat-section') as HTMLElement).getByText('Fetch models')
+    );
     await settle();
 
     expect(queryByText(/rejected the API key/)).not.toBeNull();
