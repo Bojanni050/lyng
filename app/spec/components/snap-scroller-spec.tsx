@@ -239,11 +239,14 @@ describe('SnapScroller', function () {
     mount({ date: calendarDateFromParts(2026, 10, 1), animate: false });
     const el = scrollerEl();
     spyOn(el, 'scrollTo').andCallThrough();
+    // Capture the resting position before the glide starts: mount() waits frames, so
+    // el.scrollTop has already advanced by the time the assertion runs.
+    const start = el.scrollTop;
     mount({ date: calendarDateFromParts(2026, 11, 1), animate: true });
 
     const { top, behavior } = (el.scrollTo as jasmine.Spy).mostRecentCall.args[0];
     expect(behavior).toBe('smooth');
-    expect(top).toBe(el.scrollTop + 5 * (el.clientHeight / 6));
+    expect(top).toBe(start + 5 * (el.clientHeight / 6));
   });
 
   it('glides to the units drawn at either end, and jumps past them, where a glide would stop short', function () {
