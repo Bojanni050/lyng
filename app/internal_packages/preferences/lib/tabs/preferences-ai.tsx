@@ -15,6 +15,7 @@ import { testChatProvider } from '../../../../src/ai/completion';
 import { ConfigLike } from '../types';
 import ModelPicker from './model-picker';
 import PreferencesTTS from './preferences-tts';
+import PreferencesSTT from './preferences-stt';
 
 const PROVIDER_KEY = AI_CONFIG_KEYS.provider;
 const BASE_URL_KEY = AI_CONFIG_KEYS.baseUrl;
@@ -407,6 +408,7 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
           {this._renderModelSection()}
         </div>
         <PreferencesTTS config={this.props.config} />
+        <PreferencesSTT config={this.props.config} />
       </div>
     );
   }

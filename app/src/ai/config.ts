@@ -46,6 +46,41 @@ export type TTSConfig = {
   voice: string;
 };
 
+export const STT_CONFIG_KEYS = {
+  provider: 'core.stt.provider',
+  baseUrl: 'core.stt.baseUrl',
+  apiKey: 'core.stt.apiKey',
+  model: 'core.stt.model',
+  deviceId: 'core.stt.deviceId',
+  micEnabled: 'core.stt.micEnabled',
+  activationMode: 'core.stt.activationMode',
+  hotkey: 'core.stt.hotkey',
+};
+
+/**
+ * Speech to text gets its own provider row for the same reason text to speech has one: the chat
+ * or read-aloud provider may not transcribe, and its model ids would only mislead this list.
+ */
+export const STT_PROVIDERS = [
+  { id: 'mistral', label: 'Mistral', baseUrl: 'https://api.mistral.ai/v1' },
+];
+
+export const DEFAULT_STT_HOTKEY = 'ControlRight';
+
+/** `hold` records while the key is down; `toggle` starts on the first press and stops on the next. */
+export type STTActivationMode = 'hold' | 'toggle';
+
+export type STTConfig = {
+  provider: string;
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+  deviceId: string;
+  micEnabled: boolean;
+  activationMode: STTActivationMode;
+  hotkey: string;
+};
+
 function read(key: string): string {
   const value = AppEnv.config.get(key);
   return typeof value === 'string' ? value : '';
@@ -72,6 +107,26 @@ export function readTTSConfig(): TTSConfig {
 
 /** A model is part of "configured": without one there is nothing to call. */
 export function isChatConfigured(config: ChatConfig = readChatConfig()): boolean {
+  return Boolean(config.baseUrl && config.apiKey && config.model);
+}
+
+export function readSTTConfig(): STTConfig {
+  const stored = AppEnv.config.get(STT_CONFIG_KEYS.activationMode);
+  return {
+    provider: read(STT_CONFIG_KEYS.provider) || STT_PROVIDERS[0].id,
+    baseUrl: normalizeBaseUrl(read(STT_CONFIG_KEYS.baseUrl)) || STT_PROVIDERS[0].baseUrl,
+    apiKey: read(STT_CONFIG_KEYS.apiKey),
+    model: read(STT_CONFIG_KEYS.model),
+    deviceId: read(STT_CONFIG_KEYS.deviceId),
+    // The microphone is on unless the user turned it off; nothing records until they activate it.
+    micEnabled: AppEnv.config.get(STT_CONFIG_KEYS.micEnabled) !== false,
+    activationMode: stored === 'toggle' ? 'toggle' : 'hold',
+    hotkey: read(STT_CONFIG_KEYS.hotkey) || DEFAULT_STT_HOTKEY,
+  };
+}
+
+/** Dictation needs a key and a model; the device and hotkey have usable defaults. */
+export function isSTTConfigured(config: STTConfig = readSTTConfig()): boolean {
   return Boolean(config.baseUrl && config.apiKey && config.model);
 }
 
