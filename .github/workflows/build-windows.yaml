@@ -3,13 +3,20 @@ name: Build for Windows
 on:
   workflow_dispatch:
 
+# Signing and publishing need secrets this fork does not have. Expose whether each
+# group is configured as env flags: secrets cannot be read directly in a step `if:`.
+env:
+  HAS_SIGNING: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT != '' }}
+  HAS_AWS: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
+
 jobs:
   build:
     runs-on: windows-2022
+    timeout-minutes: 60
 
     steps:
       - name: Fail if branch is not main
-        if: github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/master'
+        if: github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
         run: |
           echo "This workflow should not be triggered with workflow_dispatch on a branch other than main"
           exit 1
@@ -34,7 +41,13 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      # The packager copies whatever mailsync binary sits in app/. Without this the
+      # build succeeds and ships an app that cannot sync, so fetch it before building.
+      - name: Fetch Sync Engine
+        run: npm run fetch-mailsync
+
       - name: Setup AWS CLI
+        if: env.HAS_AWS == 'true'
         uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -50,6 +63,7 @@ jobs:
           DEBUG: electron-packager
 
       - name: Sign Application Files with Azure Trusted Signing
+        if: env.HAS_SIGNING == 'true'
         uses: azure/trusted-signing-action@v0
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -66,6 +80,7 @@ jobs:
           timestamp-digest: SHA256
 
       - name: Set Up Trusted Signing for the Installer Build
+        if: env.HAS_SIGNING == 'true'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -103,6 +118,8 @@ jobs:
           "WINDOWS_SIGNTOOL_PATH=$($signtool.Path)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "WINDOWS_SIGN_PARAMS=/v /fd SHA256 /tr http://timestamp.acs.microsoft.com /td SHA256 /dlib `"$($dlib.FullName)`" /dmdf `"$metadata`"" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
+      # create-signed-windows-installer.js builds an unsigned installer when
+      # WINDOWS_SIGN_PARAMS is unset, so this step runs for this fork too.
       - name: Create Windows Installer
         run: node app/build/create-signed-windows-installer.js
         env:
@@ -111,6 +128,7 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
       - name: Sign Windows Installer with Azure Trusted Signing
+        if: env.HAS_SIGNING == 'true'
         uses: azure/trusted-signing-action@v0
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -127,9 +145,11 @@ jobs:
           timestamp-digest: SHA256
 
       - name: Verify Every Shipped Binary Is Signed
+        if: env.HAS_SIGNING == 'true'
         run: node app/build/verify-windows-signatures.js
 
       - name: Sync Artifacts to S3
+        if: env.HAS_AWS == 'true'
         shell: pwsh
         run: |
           $commit = git rev-parse --short=8 HEAD
