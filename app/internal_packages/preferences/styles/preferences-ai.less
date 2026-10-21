@@ -1,0 +1,240 @@
+@import 'ui-variables';
+
+// AI provider settings
+
+.preferences-ai {
+  .ai-field {
+    display: flex;
+    flex-direction: column;
+    max-width: 520px;
+
+    label {
+      color: @text-color-subtle;
+      margin-bottom: 4px;
+    }
+
+    input[type='text'],
+    input[type='password'],
+    select {
+      width: 100%;
+    }
+  }
+
+  .ai-hint {
+    color: @text-color-very-subtle;
+    font-size: @font-size-smaller;
+    margin-top: 4px;
+    max-width: 520px;
+  }
+
+  .ai-key-row {
+    display: flex;
+    align-items: center;
+
+    input {
+      flex: 1;
+      margin-right: 8px;
+      font-family: @font-family-monospace;
+    }
+  }
+
+  .ai-fetch-row {
+    display: flex;
+    align-items: center;
+
+    .btn {
+      margin-right: 12px;
+      white-space: nowrap;
+    }
+  }
+
+  .ai-fetch-status {
+    color: @text-color-subtle;
+    font-size: @font-size-smaller;
+  }
+
+  .ai-error {
+    color: @color-error;
+    font-size: @font-size-smaller;
+    margin: 6px 0 10px 0;
+    max-width: 520px;
+  }
+
+  .ai-toggle {
+    display: flex;
+    align-items: center;
+    color: @text-color-very-subtle;
+    font-size: @font-size-smaller;
+    margin-top: 6px;
+  }
+
+  .ai-selected-model {
+    background-color: @background-secondary;
+    border: 1px solid @border-color-divider;
+    border-radius: 4px;
+    margin-top: 12px;
+    max-width: 520px;
+    padding: 10px 12px;
+
+    .ai-selected-model-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .ai-selected-model-name {
+      font-weight: 600;
+    }
+
+    p {
+      color: @text-color-subtle;
+      font-size: @font-size-smaller;
+      margin: 6px 0;
+      max-height: 6.5em;
+      overflow: hidden;
+    }
+  }
+}
+
+// Model picker
+
+.ai-model-picker {
+  position: relative;
+  width: 100%;
+}
+
+.ai-model-picker-button {
+  align-items: center;
+  background-color: @input-bg;
+  border: 1px solid @input-border-color;
+  border-radius: 4px;
+  color: @text-color;
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  text-align: left;
+  width: 100%;
+
+  &:disabled {
+    color: @text-color-very-subtle;
+    cursor: default;
+  }
+}
+
+.ai-model-picker-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-model-picker-hint {
+  color: @text-color-very-subtle;
+  flex-shrink: 0;
+  font-size: @font-size-smaller;
+  margin-left: 12px;
+}
+
+.ai-model-panel {
+  background-color: @background-primary;
+  border: 1px solid @border-color-divider;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  left: 0;
+  margin-top: 4px;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 100;
+}
+
+.ai-model-search {
+  border: none;
+  border-bottom: 1px solid @border-color-divider;
+  border-radius: 4px 4px 0 0;
+  padding: 8px 10px;
+  width: 100%;
+}
+
+.ai-model-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.ai-model-row {
+  border-bottom: 1px solid @border-color-divider;
+  cursor: default;
+  padding: 8px 10px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.active {
+    background-color: @background-secondary;
+  }
+
+  &.selected {
+    box-shadow: inset 3px 0 0 @accent-primary;
+  }
+}
+
+.ai-model-row-head {
+  align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+}
+
+.ai-model-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-model-price {
+  color: @text-color-subtle;
+  flex-shrink: 0;
+  font-size: @font-size-smaller;
+  margin-left: 12px;
+}
+
+.ai-model-row-description {
+  color: @text-color-very-subtle;
+  font-size: @font-size-smaller;
+  margin: 3px 0;
+  max-height: 2.8em;
+  overflow: hidden;
+}
+
+.ai-model-row-meta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.ai-model-chip {
+  background-color: @background-secondary;
+  border: 1px solid @border-color-divider;
+  border-radius: 3px;
+  color: @text-color-subtle;
+  font-size: 0.85em;
+  margin: 0 6px 4px 0;
+  padding: 0 5px;
+}
+
+.ai-model-chip-warning {
+  color: @color-error;
+}
+
+.ai-model-context {
+  color: @text-color-very-subtle;
+  font-size: @font-size-smaller;
+  margin: 0 8px 4px 0;
+}
+
+.ai-model-empty {
+  color: @text-color-very-subtle;
+  font-size: @font-size-smaller;
+  padding: 10px;
+}
