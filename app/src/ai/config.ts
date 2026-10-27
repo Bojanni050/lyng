@@ -6,6 +6,7 @@
  */
 
 import { normalizeBaseUrl } from './provider-catalog';
+import { readSecret } from './secrets';
 
 export const AI_CONFIG_KEYS = {
   provider: 'core.ai.provider',
@@ -90,7 +91,7 @@ export function readChatConfig(): ChatConfig {
   return {
     provider: read(AI_CONFIG_KEYS.provider),
     baseUrl: normalizeBaseUrl(read(AI_CONFIG_KEYS.baseUrl)),
-    apiKey: read(AI_CONFIG_KEYS.apiKey),
+    apiKey: readSecret('ai'),
     model: read(AI_CONFIG_KEYS.model),
   };
 }
@@ -99,7 +100,7 @@ export function readTTSConfig(): TTSConfig {
   return {
     provider: read(TTS_CONFIG_KEYS.provider) || TTS_PROVIDERS[0].id,
     baseUrl: normalizeBaseUrl(read(TTS_CONFIG_KEYS.baseUrl)) || TTS_PROVIDERS[0].baseUrl,
-    apiKey: read(TTS_CONFIG_KEYS.apiKey),
+    apiKey: readSecret('tts'),
     model: read(TTS_CONFIG_KEYS.model),
     voice: read(TTS_CONFIG_KEYS.voice),
   };
@@ -115,7 +116,7 @@ export function readSTTConfig(): STTConfig {
   return {
     provider: read(STT_CONFIG_KEYS.provider) || STT_PROVIDERS[0].id,
     baseUrl: normalizeBaseUrl(read(STT_CONFIG_KEYS.baseUrl)) || STT_PROVIDERS[0].baseUrl,
-    apiKey: read(STT_CONFIG_KEYS.apiKey),
+    apiKey: readSecret('stt'),
     model: read(STT_CONFIG_KEYS.model),
     deviceId: read(STT_CONFIG_KEYS.deviceId),
     // The microphone is on unless the user turned it off; nothing records until they activate it.

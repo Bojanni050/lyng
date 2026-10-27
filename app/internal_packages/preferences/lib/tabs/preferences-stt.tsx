@@ -14,6 +14,7 @@ import {
   STTConfig,
 } from '../../../../src/ai/config';
 import { formatHotkey } from '../../../../src/ai/hotkey';
+import { readSecret, storeSecret } from '../../../../src/ai/secrets';
 import { ConfigLike } from '../types';
 import ModelPicker from './model-picker';
 
@@ -114,7 +115,7 @@ class PreferencesSTT extends React.Component<{ config: ConfigLike }, Preferences
   }
 
   _onApiKeyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this._setConfig(STT_CONFIG_KEYS.apiKey, event.target.value);
+    void storeSecret('stt', event.target.value);
     this.setState({ apiKey: event.target.value, error: null, status: null });
   };
 
@@ -383,7 +384,7 @@ function readSTTConfigFrom(
   return {
     provider: stringValue(STT_CONFIG_KEYS.provider) || provider.id,
     baseUrl: stringValue(STT_CONFIG_KEYS.baseUrl) || provider.baseUrl,
-    apiKey: stringValue(STT_CONFIG_KEYS.apiKey),
+    apiKey: readSecret('stt', config),
     model: stringValue(STT_CONFIG_KEYS.model),
     deviceId: stringValue(STT_CONFIG_KEYS.deviceId),
     // ConfigLike types `get` as string, but this key stores a real boolean.

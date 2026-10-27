@@ -12,6 +12,7 @@ import {
   TTSConfig,
 } from '../../../../src/ai/config';
 import { fetchTTSVoices, synthesizeSpeech, TTSVoice } from '../../../../src/ai/speech';
+import { readSecret, storeSecret } from '../../../../src/ai/secrets';
 import { ConfigLike } from '../types';
 import ModelPicker from './model-picker';
 
@@ -105,7 +106,7 @@ class PreferencesTTS extends React.Component<{ config: ConfigLike }, Preferences
   }
 
   _onApiKeyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this._setConfig(TTS_CONFIG_KEYS.apiKey, event.target.value);
+    void storeSecret('tts', event.target.value);
     this.setState({ apiKey: event.target.value, error: null, status: null });
   };
 
@@ -368,7 +369,7 @@ function readTTSConfigFrom(config: ConfigLike): {
   return {
     provider: read(TTS_CONFIG_KEYS.provider) || TTS_PROVIDERS[0].id,
     baseUrl: read(TTS_CONFIG_KEYS.baseUrl) || TTS_PROVIDERS[0].baseUrl,
-    apiKey: read(TTS_CONFIG_KEYS.apiKey),
+    apiKey: readSecret('tts', config),
     model: read(TTS_CONFIG_KEYS.model),
     voice: read(TTS_CONFIG_KEYS.voice),
   };

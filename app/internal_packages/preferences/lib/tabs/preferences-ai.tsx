@@ -11,6 +11,7 @@ import {
   presetFor,
 } from '../../../../src/ai/provider-catalog';
 import { AI_CONFIG_KEYS, ChatConfig } from '../../../../src/ai/config';
+import { readSecret, storeSecret } from '../../../../src/ai/secrets';
 import { testChatProvider } from '../../../../src/ai/completion';
 import { ConfigLike } from '../types';
 import ModelPicker from './model-picker';
@@ -19,7 +20,6 @@ import PreferencesSTT from './preferences-stt';
 
 const PROVIDER_KEY = AI_CONFIG_KEYS.provider;
 const BASE_URL_KEY = AI_CONFIG_KEYS.baseUrl;
-const API_KEY = AI_CONFIG_KEYS.apiKey;
 const MODEL_KEY = AI_CONFIG_KEYS.model;
 
 const CUSTOM_PROVIDER = 'custom';
@@ -63,7 +63,7 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
     this.state = {
       provider: savedProvider || fallbackPreset?.id || AI_PROVIDER_PRESETS[0].id,
       baseUrl: savedBaseUrl || fallbackPreset?.baseUrl || AI_PROVIDER_PRESETS[0].baseUrl,
-      apiKey: props.config.get(API_KEY) || '',
+      apiKey: readSecret('ai', props.config) || '',
       model: props.config.get(MODEL_KEY) || '',
       models: null,
       loading: false,
@@ -119,7 +119,7 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
   };
 
   _onApiKeyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this._setConfig(API_KEY, event.target.value);
+    void storeSecret('ai', event.target.value);
     this.setState({ apiKey: event.target.value, error: null });
   };
 

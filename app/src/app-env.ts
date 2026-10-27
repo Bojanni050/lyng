@@ -737,6 +737,15 @@ export default class AppEnvConstructor {
   async startRootWindow() {
     this.restoreWindowDimensions();
     this.getCurrentWindow().setMinimumSize(875, 250);
+    // Fill the AI secrets cache and migrate plain-text keys from earlier versions into the
+    // encrypted blob. Fire-and-forget: every read falls back to the plain slot until it lands.
+    if (!this.inSpecMode()) {
+      require('./ai/secrets')
+        .loadSecrets()
+        .catch((err: unknown) =>
+          console.warn('Nuntio could not load the AI keys from storage.', err)
+        );
+    }
     await this.startWindow();
   }
 
