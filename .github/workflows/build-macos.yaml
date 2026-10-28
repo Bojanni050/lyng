@@ -44,8 +44,8 @@ jobs:
 
       - name: Setup Provisioning Profile
         run: |
-          echo "APPLE_PROVISIONING_PROFILE_PATH=${{ runner.temp }}/Mailspring.provisionprofile" >> $GITHUB_ENV
-          echo $APPLE_PROVISIONING_PROFILE_B64 | base64 --decode > "${{ runner.temp }}/Mailspring.provisionprofile"
+          echo "APPLE_PROVISIONING_PROFILE_PATH=${{ runner.temp }}/Lyng.provisionprofile" >> $GITHUB_ENV
+          echo $APPLE_PROVISIONING_PROFILE_B64 | base64 --decode > "${{ runner.temp }}/Lyng.provisionprofile"
         env:
           APPLE_PROVISIONING_PROFILE_B64: ${{ secrets.APPLE_PROVISIONING_PROFILE_B64 }}
 
@@ -54,7 +54,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: fsn1
 
       - name: Lint
         run: npm run lint:check
@@ -74,10 +74,11 @@ jobs:
       - name: Rename artifacts
         if: matrix.arch == 'arm64'
         run: |
-          mv app/dist/Mailspring.zip app/dist/Mailspring-AppleSilicon.zip
+          mv app/dist/Lyng.zip app/dist/Lyng-AppleSilicon.zip
 
       - name: Sync artifacts to S3 bucket
         run: |
-          aws s3 sync app/dist/ "s3://mailspring-builds/client/$(git rev-parse --short=8 HEAD)/osx" \
+          aws s3 sync app/dist/ "s3://dd-596-veles/client/$(git rev-parse --short=8 HEAD)/osx" \
+            --endpoint-url https://s3.danubedata.ro \
             --acl public-read \
             --exclude "*" --include *.zip

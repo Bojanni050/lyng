@@ -57,7 +57,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: fsn1
 
       - name: Lint
         run: npm run lint:check
@@ -67,21 +67,22 @@ jobs:
 
       - name: Sync Artifacts to S3
         run: |
-          aws s3 sync app/dist/ "s3://mailspring-builds/client/$(git rev-parse --short=8 HEAD)/linux" \
+          aws s3 sync app/dist/ "s3://dd-596-veles/client/$(git rev-parse --short=8 HEAD)/linux" \
+            --endpoint-url https://s3.danubedata.ro \
             --acl public-read \
             --exclude "*" --include *.deb --include *.rpm
 
       - name: Upload DEB artifact for testing
         uses: actions/upload-artifact@v7
         with:
-          name: mailspring-deb
+          name: lyng-deb
           path: app/dist/*.deb
           retention-days: 1
 
       - name: Upload RPM artifact for testing
         uses: actions/upload-artifact@v7
         with:
-          name: mailspring-rpm
+          name: lyng-rpm
           path: app/dist/*.rpm
           retention-days: 1
 
@@ -100,7 +101,7 @@ jobs:
       - name: Download DEB artifact
         uses: actions/download-artifact@v8
         with:
-          name: mailspring-deb
+          name: lyng-deb
           path: app/dist/
 
       - uses: snapcore/action-build@v1
@@ -123,13 +124,13 @@ jobs:
       - name: Download DEB artifact
         uses: actions/download-artifact@v8
         with:
-          name: mailspring-deb
+          name: lyng-deb
 
       - name: Test installation on Ubuntu ${{ matrix.ubuntu_version }}
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace ubuntu:${{ matrix.ubuntu_version }} bash -c "
             set -e
-            echo '=== Testing Mailspring installation on Ubuntu ${{ matrix.ubuntu_version }} ==='
+            echo '=== Testing Lyng installation on Ubuntu ${{ matrix.ubuntu_version }} ==='
 
             # Install the DEB package (this will auto-install dependencies)
             cd /workspace
@@ -146,45 +147,45 @@ jobs:
             apt-get install -y xvfb
 
             # Verify installation succeeded
-            dpkg -l | grep mailspring || (echo '✗ Mailspring package not installed' && exit 1)
+            dpkg -l | grep lyng || (echo '✗ Lyng package not installed' && exit 1)
 
             # Verify the binary exists and is executable
-            which mailspring || (echo '✗ mailspring binary not found in PATH' && exit 1)
+            which lyng || (echo '✗ lyng binary not found in PATH' && exit 1)
 
             # List installed files
             echo 'Installed files:'
-            dpkg -L mailspring | head -20
+            dpkg -L lyng | head -20
 
-            # Run mailspring --version with virtual display (use --no-sandbox for Docker)
-            echo 'Running mailspring --version...'
-            xvfb-run -a mailspring --version --no-sandbox > /tmp/version.txt 2>&1 || true
+            # Run lyng --version with virtual display (use --no-sandbox for Docker)
+            echo 'Running lyng --version...'
+            xvfb-run -a lyng --version --no-sandbox > /tmp/version.txt 2>&1 || true
             cat /tmp/version.txt
 
             # Verify version command succeeded (output should contain a version number)
             if grep -qE '[0-9]+\.[0-9]+\.[0-9]+' /tmp/version.txt; then
-              echo '✓ mailspring --version passed on Ubuntu ${{ matrix.ubuntu_version }}'
+              echo '✓ lyng --version passed on Ubuntu ${{ matrix.ubuntu_version }}'
             else
-              echo '✗ mailspring --version failed on Ubuntu ${{ matrix.ubuntu_version }}'
+              echo '✗ lyng --version failed on Ubuntu ${{ matrix.ubuntu_version }}'
               exit 1
             fi
 
             # Verify mailsync binary exists (check multiple locations)
-            if [ -f /usr/share/mailspring/mailsync ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/mailsync'
-              MAILSYNC_PATH=/usr/share/mailspring/mailsync
-            elif [ -f /usr/share/mailspring/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/mailsync.bin'
-              MAILSYNC_PATH=/usr/share/mailspring/mailsync.bin
-            elif [ -f /usr/share/mailspring/resources/app.asar.unpacked/mailsync ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/resources/app.asar.unpacked/mailsync'
-              MAILSYNC_PATH=/usr/share/mailspring/resources/app.asar.unpacked/mailsync
-            elif [ -f /usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin'
-              MAILSYNC_PATH=/usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin
+            if [ -f /usr/share/lyng/mailsync ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/mailsync'
+              MAILSYNC_PATH=/usr/share/lyng/mailsync
+            elif [ -f /usr/share/lyng/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/mailsync.bin'
+              MAILSYNC_PATH=/usr/share/lyng/mailsync.bin
+            elif [ -f /usr/share/lyng/resources/app.asar.unpacked/mailsync ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/resources/app.asar.unpacked/mailsync'
+              MAILSYNC_PATH=/usr/share/lyng/resources/app.asar.unpacked/mailsync
+            elif [ -f /usr/share/lyng/resources/app.asar.unpacked/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/resources/app.asar.unpacked/mailsync.bin'
+              MAILSYNC_PATH=/usr/share/lyng/resources/app.asar.unpacked/mailsync.bin
             else
               echo '✗ mailsync binary not found'
-              echo 'Files in /usr/share/mailspring/:'
-              ls -la /usr/share/mailspring/ | head -30
+              echo 'Files in /usr/share/lyng/:'
+              ls -la /usr/share/lyng/ | head -30
               exit 1
             fi
 
@@ -205,7 +206,7 @@ jobs:
               exit 1
             fi
 
-            echo '✓ Mailspring installation test passed on Ubuntu ${{ matrix.ubuntu_version }}'
+            echo '✓ Lyng installation test passed on Ubuntu ${{ matrix.ubuntu_version }}'
           "
 
   test-fedora:
@@ -218,13 +219,13 @@ jobs:
       - name: Download RPM artifact
         uses: actions/download-artifact@v8
         with:
-          name: mailspring-rpm
+          name: lyng-rpm
 
       - name: Test installation on Fedora ${{ matrix.fedora_version }}
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace fedora:${{ matrix.fedora_version }} bash -c "
             set -e
-            echo '=== Testing Mailspring installation on Fedora ${{ matrix.fedora_version }} ==='
+            echo '=== Testing Lyng installation on Fedora ${{ matrix.fedora_version }} ==='
 
             # Install dependencies first
             cd /workspace
@@ -234,53 +235,53 @@ jobs:
             dnf install -y *.rpm
 
             # Verify installation succeeded
-            rpm -q mailspring || (echo '✗ Mailspring package not installed' && exit 1)
+            rpm -q lyng || (echo '✗ Lyng package not installed' && exit 1)
 
             # Verify the binary exists and is executable
-            which mailspring || (echo '✗ mailspring binary not found in PATH' && exit 1)
+            which lyng || (echo '✗ lyng binary not found in PATH' && exit 1)
 
             # List installed files
             echo 'Installed files:'
-            rpm -ql mailspring | head -20
+            rpm -ql lyng | head -20
 
-            # Run mailspring --version with virtual display (use --no-sandbox for Docker)
-            echo 'Running mailspring --version...'
-            xvfb-run -a mailspring --version --no-sandbox > /tmp/version.txt 2>&1 || true
+            # Run lyng --version with virtual display (use --no-sandbox for Docker)
+            echo 'Running lyng --version...'
+            xvfb-run -a lyng --version --no-sandbox > /tmp/version.txt 2>&1 || true
             cat /tmp/version.txt
 
             # Verify version command succeeded (output should contain a version number)
             if grep -qE '[0-9]+\.[0-9]+\.[0-9]+' /tmp/version.txt; then
-              echo '✓ mailspring --version passed on Fedora ${{ matrix.fedora_version }}'
+              echo '✓ lyng --version passed on Fedora ${{ matrix.fedora_version }}'
             else
-              echo '✗ mailspring --version failed on Fedora ${{ matrix.fedora_version }}'
+              echo '✗ lyng --version failed on Fedora ${{ matrix.fedora_version }}'
               exit 1
             fi
 
             # Verify mailsync binary exists (check multiple possible locations and names)
-            if [ -f /usr/share/mailspring/mailsync ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/mailsync'
-              MAILSYNC_PATH=/usr/share/mailspring/mailsync
-            elif [ -f /usr/share/mailspring/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/mailsync.bin'
-              MAILSYNC_PATH=/usr/share/mailspring/mailsync.bin
-            elif [ -f /usr/share/mailspring/resources/app.asar.unpacked/mailsync ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/resources/app.asar.unpacked/mailsync'
-              MAILSYNC_PATH=/usr/share/mailspring/resources/app.asar.unpacked/mailsync
-            elif [ -f /usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin'
-              MAILSYNC_PATH=/usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin
-            elif [ -f /usr/local/share/mailspring/mailsync ]; then
-              echo 'Found mailsync binary at /usr/local/share/mailspring/mailsync'
-              MAILSYNC_PATH=/usr/local/share/mailspring/mailsync
-            elif [ -f /usr/local/share/mailspring/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/local/share/mailspring/mailsync.bin'
-              MAILSYNC_PATH=/usr/local/share/mailspring/mailsync.bin
+            if [ -f /usr/share/lyng/mailsync ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/mailsync'
+              MAILSYNC_PATH=/usr/share/lyng/mailsync
+            elif [ -f /usr/share/lyng/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/mailsync.bin'
+              MAILSYNC_PATH=/usr/share/lyng/mailsync.bin
+            elif [ -f /usr/share/lyng/resources/app.asar.unpacked/mailsync ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/resources/app.asar.unpacked/mailsync'
+              MAILSYNC_PATH=/usr/share/lyng/resources/app.asar.unpacked/mailsync
+            elif [ -f /usr/share/lyng/resources/app.asar.unpacked/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/resources/app.asar.unpacked/mailsync.bin'
+              MAILSYNC_PATH=/usr/share/lyng/resources/app.asar.unpacked/mailsync.bin
+            elif [ -f /usr/local/share/lyng/mailsync ]; then
+              echo 'Found mailsync binary at /usr/local/share/lyng/mailsync'
+              MAILSYNC_PATH=/usr/local/share/lyng/mailsync
+            elif [ -f /usr/local/share/lyng/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/local/share/lyng/mailsync.bin'
+              MAILSYNC_PATH=/usr/local/share/lyng/mailsync.bin
             else
               echo '✗ mailsync binary not found'
               echo 'Searching for mailsync in RPM files:'
-              rpm -ql mailspring | grep -i mailsync || echo 'No mailsync found in package'
-              echo 'Files in /usr/share/mailspring/:'
-              ls -la /usr/share/mailspring/ | head -30
+              rpm -ql lyng | grep -i mailsync || echo 'No mailsync found in package'
+              echo 'Files in /usr/share/lyng/:'
+              ls -la /usr/share/lyng/ | head -30
               exit 1
             fi
 
@@ -302,7 +303,7 @@ jobs:
               exit 1
             fi
 
-            echo '✓ Mailspring installation test passed on Fedora ${{ matrix.fedora_version }}'
+            echo '✓ Lyng installation test passed on Fedora ${{ matrix.fedora_version }}'
           "
 
   test-opensuse:
@@ -312,13 +313,13 @@ jobs:
       - name: Download RPM artifact
         uses: actions/download-artifact@v8
         with:
-          name: mailspring-rpm
+          name: lyng-rpm
 
       - name: Test installation on openSUSE Tumbleweed
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace opensuse/tumbleweed bash -c "
             set -e
-            echo '=== Testing Mailspring installation on openSUSE Tumbleweed ==='
+            echo '=== Testing Lyng installation on openSUSE Tumbleweed ==='
 
             # Install dependencies first
             cd /workspace
@@ -335,58 +336,58 @@ jobs:
             # Install the RPM package (zypper will auto-resolve dependencies)
             zypper --non-interactive --no-gpg-checks install *.rpm; ZYPPER_EXIT=\$?
             if [ \$ZYPPER_EXIT -ne 0 ] && [ \$ZYPPER_EXIT -ne 107 ]; then
-              echo \"zypper install mailspring failed with exit code \$ZYPPER_EXIT\"
+              echo \"zypper install lyng failed with exit code \$ZYPPER_EXIT\"
               exit 1
             fi
 
             # Verify installation succeeded
-            rpm -q mailspring || (echo '✗ Mailspring package not installed' && exit 1)
+            rpm -q lyng || (echo '✗ Lyng package not installed' && exit 1)
 
             # Verify the binary exists and is executable
-            which mailspring || (echo '✗ mailspring binary not found in PATH' && exit 1)
+            which lyng || (echo '✗ lyng binary not found in PATH' && exit 1)
 
             # List installed files
             echo 'Installed files:'
-            rpm -ql mailspring | head -20
+            rpm -ql lyng | head -20
 
-            # Run mailspring --version with virtual display (use --no-sandbox for Docker)
-            echo 'Running mailspring --version...'
-            xvfb-run -a mailspring --version --no-sandbox > /tmp/version.txt 2>&1 || true
+            # Run lyng --version with virtual display (use --no-sandbox for Docker)
+            echo 'Running lyng --version...'
+            xvfb-run -a lyng --version --no-sandbox > /tmp/version.txt 2>&1 || true
             cat /tmp/version.txt
 
             # Verify version command succeeded (output should contain a version number)
             if grep -qE '[0-9]+\.[0-9]+\.[0-9]+' /tmp/version.txt; then
-              echo '✓ mailspring --version passed on openSUSE Tumbleweed'
+              echo '✓ lyng --version passed on openSUSE Tumbleweed'
             else
-              echo '✗ mailspring --version failed on openSUSE Tumbleweed'
+              echo '✗ lyng --version failed on openSUSE Tumbleweed'
               exit 1
             fi
 
             # Verify mailsync binary exists (check multiple possible locations and names)
-            if [ -f /usr/share/mailspring/mailsync ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/mailsync'
-              MAILSYNC_PATH=/usr/share/mailspring/mailsync
-            elif [ -f /usr/share/mailspring/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/mailsync.bin'
-              MAILSYNC_PATH=/usr/share/mailspring/mailsync.bin
-            elif [ -f /usr/share/mailspring/resources/app.asar.unpacked/mailsync ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/resources/app.asar.unpacked/mailsync'
-              MAILSYNC_PATH=/usr/share/mailspring/resources/app.asar.unpacked/mailsync
-            elif [ -f /usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin'
-              MAILSYNC_PATH=/usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin
-            elif [ -f /usr/local/share/mailspring/mailsync ]; then
-              echo 'Found mailsync binary at /usr/local/share/mailspring/mailsync'
-              MAILSYNC_PATH=/usr/local/share/mailspring/mailsync
-            elif [ -f /usr/local/share/mailspring/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/local/share/mailspring/mailsync.bin'
-              MAILSYNC_PATH=/usr/local/share/mailspring/mailsync.bin
+            if [ -f /usr/share/lyng/mailsync ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/mailsync'
+              MAILSYNC_PATH=/usr/share/lyng/mailsync
+            elif [ -f /usr/share/lyng/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/mailsync.bin'
+              MAILSYNC_PATH=/usr/share/lyng/mailsync.bin
+            elif [ -f /usr/share/lyng/resources/app.asar.unpacked/mailsync ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/resources/app.asar.unpacked/mailsync'
+              MAILSYNC_PATH=/usr/share/lyng/resources/app.asar.unpacked/mailsync
+            elif [ -f /usr/share/lyng/resources/app.asar.unpacked/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/resources/app.asar.unpacked/mailsync.bin'
+              MAILSYNC_PATH=/usr/share/lyng/resources/app.asar.unpacked/mailsync.bin
+            elif [ -f /usr/local/share/lyng/mailsync ]; then
+              echo 'Found mailsync binary at /usr/local/share/lyng/mailsync'
+              MAILSYNC_PATH=/usr/local/share/lyng/mailsync
+            elif [ -f /usr/local/share/lyng/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/local/share/lyng/mailsync.bin'
+              MAILSYNC_PATH=/usr/local/share/lyng/mailsync.bin
             else
               echo '✗ mailsync binary not found'
               echo 'Searching for mailsync in RPM files:'
-              rpm -ql mailspring | grep -i mailsync || echo 'No mailsync found in package'
-              echo 'Files in /usr/share/mailspring/:'
-              ls -la /usr/share/mailspring/ | head -30
+              rpm -ql lyng | grep -i mailsync || echo 'No mailsync found in package'
+              echo 'Files in /usr/share/lyng/:'
+              ls -la /usr/share/lyng/ | head -30
               exit 1
             fi
 
@@ -407,7 +408,7 @@ jobs:
               exit 1
             fi
 
-            echo '✓ Mailspring installation test passed on openSUSE Tumbleweed'
+            echo '✓ Lyng installation test passed on openSUSE Tumbleweed'
           "
 
   test-arch:
@@ -417,13 +418,13 @@ jobs:
       - name: Download DEB artifact
         uses: actions/download-artifact@v8
         with:
-          name: mailspring-deb
+          name: lyng-deb
 
       - name: Test installation on Arch Linux
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace archlinux:latest bash -c "
             set -e
-            echo '=== Testing Mailspring installation on Arch Linux ==='
+            echo '=== Testing Lyng installation on Arch Linux ==='
 
             # Update package database and install required tools and libraries
             pacman -Syu --noconfirm
@@ -441,43 +442,43 @@ jobs:
             tar -xf data.tar.* -C /
 
             # Verify the binary exists and is in PATH
-            ls -la /usr/bin/mailspring
-            ls -la /usr/share/mailspring/
+            ls -la /usr/bin/lyng
+            ls -la /usr/share/lyng/
 
             # List installed files
             echo 'Extracted files:'
-            find /usr/share/mailspring -type f | head -20
+            find /usr/share/lyng -type f | head -20
 
-            # Run mailspring --version with virtual display (use --no-sandbox for Docker)
-            echo 'Running mailspring --version...'
-            xvfb-run -a /usr/bin/mailspring --version --no-sandbox > /tmp/version.txt 2>&1 || true
+            # Run lyng --version with virtual display (use --no-sandbox for Docker)
+            echo 'Running lyng --version...'
+            xvfb-run -a /usr/bin/lyng --version --no-sandbox > /tmp/version.txt 2>&1 || true
             cat /tmp/version.txt
 
             # Verify version command succeeded (output should contain a version number)
             if grep -qE '[0-9]+\.[0-9]+\.[0-9]+' /tmp/version.txt; then
-              echo '✓ mailspring --version passed on Arch Linux'
+              echo '✓ lyng --version passed on Arch Linux'
             else
-              echo '✗ mailspring --version failed on Arch Linux'
+              echo '✗ lyng --version failed on Arch Linux'
               exit 1
             fi
 
             # Verify mailsync binary exists (check multiple locations)
-            if [ -f /usr/share/mailspring/mailsync ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/mailsync'
-              MAILSYNC_PATH=/usr/share/mailspring/mailsync
-            elif [ -f /usr/share/mailspring/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/mailsync.bin'
-              MAILSYNC_PATH=/usr/share/mailspring/mailsync.bin
-            elif [ -f /usr/share/mailspring/resources/app.asar.unpacked/mailsync ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/resources/app.asar.unpacked/mailsync'
-              MAILSYNC_PATH=/usr/share/mailspring/resources/app.asar.unpacked/mailsync
-            elif [ -f /usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin'
-              MAILSYNC_PATH=/usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin
+            if [ -f /usr/share/lyng/mailsync ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/mailsync'
+              MAILSYNC_PATH=/usr/share/lyng/mailsync
+            elif [ -f /usr/share/lyng/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/mailsync.bin'
+              MAILSYNC_PATH=/usr/share/lyng/mailsync.bin
+            elif [ -f /usr/share/lyng/resources/app.asar.unpacked/mailsync ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/resources/app.asar.unpacked/mailsync'
+              MAILSYNC_PATH=/usr/share/lyng/resources/app.asar.unpacked/mailsync
+            elif [ -f /usr/share/lyng/resources/app.asar.unpacked/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/resources/app.asar.unpacked/mailsync.bin'
+              MAILSYNC_PATH=/usr/share/lyng/resources/app.asar.unpacked/mailsync.bin
             else
               echo '✗ mailsync binary not found'
-              echo 'Files in /usr/share/mailspring/:'
-              ls -la /usr/share/mailspring/ | head -30
+              echo 'Files in /usr/share/lyng/:'
+              ls -la /usr/share/lyng/ | head -30
               exit 1
             fi
 
@@ -498,7 +499,7 @@ jobs:
               exit 1
             fi
 
-            echo '✓ Mailspring installation test passed on Arch Linux'
+            echo '✓ Lyng installation test passed on Arch Linux'
           "
 
   test-linuxmint:
@@ -511,13 +512,13 @@ jobs:
       - name: Download DEB artifact
         uses: actions/download-artifact@v8
         with:
-          name: mailspring-deb
+          name: lyng-deb
 
       - name: Test installation on Linux Mint ${{ matrix.mint_version }}
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace linuxmintd/mint${{ matrix.mint_version }}-amd64 bash -c "
             set -e
-            echo '=== Testing Mailspring installation on Linux Mint ${{ matrix.mint_version }} ==='
+            echo '=== Testing Lyng installation on Linux Mint ${{ matrix.mint_version }} ==='
 
             # Install the DEB package using gdebi (what most users use)
             # gdebi has stricter dependency checking than apt-get install -f
@@ -535,45 +536,45 @@ jobs:
             gdebi --non-interactive *.deb
 
             # Verify installation succeeded
-            dpkg -l | grep mailspring || (echo '✗ Mailspring package not installed' && exit 1)
+            dpkg -l | grep lyng || (echo '✗ Lyng package not installed' && exit 1)
 
             # Verify the binary exists and is executable
-            which mailspring || (echo '✗ mailspring binary not found in PATH' && exit 1)
+            which lyng || (echo '✗ lyng binary not found in PATH' && exit 1)
 
             # List installed files
             echo 'Installed files:'
-            dpkg -L mailspring | head -20
+            dpkg -L lyng | head -20
 
-            # Run mailspring --version with virtual display (use --no-sandbox for Docker)
-            echo 'Running mailspring --version...'
-            xvfb-run -a mailspring --version --no-sandbox > /tmp/version.txt 2>&1 || true
+            # Run lyng --version with virtual display (use --no-sandbox for Docker)
+            echo 'Running lyng --version...'
+            xvfb-run -a lyng --version --no-sandbox > /tmp/version.txt 2>&1 || true
             cat /tmp/version.txt
 
             # Verify version command succeeded (output should contain a version number)
             if grep -qE '[0-9]+\.[0-9]+\.[0-9]+' /tmp/version.txt; then
-              echo '✓ mailspring --version passed on Linux Mint ${{ matrix.mint_version }}'
+              echo '✓ lyng --version passed on Linux Mint ${{ matrix.mint_version }}'
             else
-              echo '✗ mailspring --version failed on Linux Mint ${{ matrix.mint_version }}'
+              echo '✗ lyng --version failed on Linux Mint ${{ matrix.mint_version }}'
               exit 1
             fi
 
             # Verify mailsync binary exists (check multiple locations)
-            if [ -f /usr/share/mailspring/mailsync ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/mailsync'
-              MAILSYNC_PATH=/usr/share/mailspring/mailsync
-            elif [ -f /usr/share/mailspring/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/mailsync.bin'
-              MAILSYNC_PATH=/usr/share/mailspring/mailsync.bin
-            elif [ -f /usr/share/mailspring/resources/app.asar.unpacked/mailsync ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/resources/app.asar.unpacked/mailsync'
-              MAILSYNC_PATH=/usr/share/mailspring/resources/app.asar.unpacked/mailsync
-            elif [ -f /usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin ]; then
-              echo 'Found mailsync binary at /usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin'
-              MAILSYNC_PATH=/usr/share/mailspring/resources/app.asar.unpacked/mailsync.bin
+            if [ -f /usr/share/lyng/mailsync ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/mailsync'
+              MAILSYNC_PATH=/usr/share/lyng/mailsync
+            elif [ -f /usr/share/lyng/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/mailsync.bin'
+              MAILSYNC_PATH=/usr/share/lyng/mailsync.bin
+            elif [ -f /usr/share/lyng/resources/app.asar.unpacked/mailsync ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/resources/app.asar.unpacked/mailsync'
+              MAILSYNC_PATH=/usr/share/lyng/resources/app.asar.unpacked/mailsync
+            elif [ -f /usr/share/lyng/resources/app.asar.unpacked/mailsync.bin ]; then
+              echo 'Found mailsync binary at /usr/share/lyng/resources/app.asar.unpacked/mailsync.bin'
+              MAILSYNC_PATH=/usr/share/lyng/resources/app.asar.unpacked/mailsync.bin
             else
               echo '✗ mailsync binary not found'
-              echo 'Files in /usr/share/mailspring/:'
-              ls -la /usr/share/mailspring/ | head -30
+              echo 'Files in /usr/share/lyng/:'
+              ls -la /usr/share/lyng/ | head -30
               exit 1
             fi
 
@@ -594,5 +595,5 @@ jobs:
               exit 1
             fi
 
-            echo '✓ Mailspring installation test passed on Linux Mint ${{ matrix.mint_version }}'
+            echo '✓ Lyng installation test passed on Linux Mint ${{ matrix.mint_version }}'
           "

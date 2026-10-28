@@ -52,7 +52,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: fsn1
 
       - name: Lint
         run: npm run lint:check
@@ -72,7 +72,7 @@ jobs:
           endpoint: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
           trusted-signing-account-name: ${{ vars.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
           certificate-profile-name: ${{ vars.AZURE_TRUSTED_SIGNING_CERT_PROFILE_NAME }}
-          files-folder: ${{ github.workspace }}\app\dist\mailspring-win32-x64
+          files-folder: ${{ github.workspace }}\app\dist\Lyng-win32-x64
           files-folder-filter: exe,dll,node
           files-folder-recurse: true
           file-digest: SHA256
@@ -153,9 +153,10 @@ jobs:
         shell: pwsh
         run: |
           $commit = git rev-parse --short=8 HEAD
-          aws s3 sync app/dist/ "s3://mailspring-builds/client/$commit/win-x64" `
+          aws s3 sync app/dist/ "s3://dd-596-veles/client/$commit/win-x64" `
+            --endpoint-url https://s3.danubedata.ro `
             --acl public-read `
             --exclude "*" `
-            --include "MailspringSetup.exe" `
+            --include "LyngSetup.exe" `
             --include "*.nupkg" `
             --include "RELEASES"
