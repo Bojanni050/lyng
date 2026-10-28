@@ -89,10 +89,7 @@ export class DefaultClientHelperWindows implements DCH {
             shell.openExternal('ms-settings:defaultapps?registeredAppUser=Lyng').catch((err) => {
               AppEnv.showErrorDialog({
                 title: localized('Failed to Open Settings'),
-                message: localized(
-                  'Lyng was unable to open Windows Settings.\n\n%@',
-                  err.message
-                ),
+                message: localized('Lyng was unable to open Windows Settings.\n\n%@', err.message),
               });
             });
           }
