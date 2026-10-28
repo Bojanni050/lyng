@@ -249,7 +249,7 @@ export class CalendarTask extends Model {
 ## Scope Consideration
 
 This is a significant feature addition. Consider:
-- Is task management in scope for Mailspring?
+- Is task management in scope for Lyng?
 - Would a separate "Tasks" view be needed?
 - Integration with email (task from email)?
 

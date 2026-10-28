@@ -7,34 +7,29 @@
   <summary><%= description %></summary>
   <description>
     <p>
-      Mailspring is a new version of Nylas Mail maintained by one of the original authors. It's
-      faster, leaner, and shipping today! It replaces the JavaScript sync code in Nylas Mail with
-      a new C++ sync engine based on Mailcore2. It uses roughly half the RAM and CPU of Nylas Mail
-      and idles with almost zero "CPU Wakes", which translates to great battery life. It also has
-      an entirely revamped composer and other great new features.
+      Lyng is a local-first mail client built on the Mailspring codebase (GPL-3.0). It replaces
+      the JavaScript sync code of Nylas Mail with a C++ sync engine based on Mailcore2, runs all
+      of its features locally, and adds local AI features on top.
     </p>
     <p>
-      Mailspring comes packed with powerful features like Unified Inbox, Snooze, Send Later, Mail
-      Rules, Templates and more. Mailspring Pro, which you can unlock with a monthly subscription,
-      adds even more features for people who send a ton of email: link tracking, read receipts,
-      mailbox analytics, contact and company profiles. All of these features run in the client -
-      Mailspring does not send your email credentials to the cloud.
+      Lyng comes packed with powerful features like Unified Inbox, Snooze, Send Later, Mail
+      Rules, Templates and more. Pro favorites like link tracking, read receipts, mailbox
+      analytics, contact and company profiles run without any account, because everything runs
+      in the client - Lyng does not send your email credentials to the cloud.
     </p>
   </description>
 
-  <url type="homepage">https://getmailspring.com/</url>
-  <url type="bugtracker">https://community.getmailspring.com/c/bugs</url>
-  <url type="contact">https://community.getmailspring.com/c/help</url>
-  <url type="help">https://getmailspring.com/docs/</url>
-  <url type="faq">https://getmailspring.com/docs/faq</url>
-  <url type="donation">https://www.getmailspring.com/pro</url>
-  <url type="contribute">https://github.com/Foundry376/Mailspring/blob/master/CONTRIBUTING.md</url>
-  <url type="vcs-browser">https://github.com/Foundry376/Mailspring</url>
+  <url type="homepage">https://github.com/Bojanni050/lyng</url>
+  <url type="bugtracker">https://github.com/Bojanni050/lyng/issues</url>
+  <url type="contact">https://github.com/Bojanni050/lyng/issues</url>
+  <url type="help">https://github.com/Bojanni050/lyng</url>
+  <url type="contribute">https://github.com/Bojanni050/lyng/blob/main/CONTRIBUTING.md</url>
+  <url type="vcs-browser">https://github.com/Bojanni050/lyng</url>
 
   <launchable type="desktop-id"><%= desktopName %></launchable>
 
-  <developer id="com.getmailspring">
-    <name>Mailspring</name>
+  <developer id="io.github.bojanni050">
+    <name>Lyng Team</name>
   </developer>
 
   <branding>
@@ -44,8 +39,8 @@
 
   <screenshots>
     <screenshot type="default">
-      <caption>Mailspring Hero</caption>
-      <image type="source">https://getmailspring.com/static/img/hero_graphic_linux@2x.png</image>
+      <caption>Lyng Hero</caption>
+      <image type="source">https://github.com/Bojanni050/lyng/raw/main/screenshots/hero_graphic_mac@2x.png</image>
     </screenshot>
   </screenshots>
 

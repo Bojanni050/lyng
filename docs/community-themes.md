@@ -1,6 +1,6 @@
-# Community Themes for Mailspring
+# Community Themes for Lyng
 
-This document lists known third-party themes for Mailspring found on GitHub.
+This document lists known third-party themes (built on Mailspring's theme CSS, which Lyng inherits) found on GitHub.
 
 ## Official Resources
 
@@ -84,12 +84,12 @@ To create your own theme:
 
 ### Theme Installation
 
-Install themes via **Edit > Install Theme...** (or **Mailspring > Install Theme...** on macOS) and select the theme folder.
+Install themes via **Edit > Install Theme...** (or **Lyng > Install Theme...** on macOS) and select the theme folder.
 
 Alternatively, copy or symlink themes to:
-- **macOS**: `~/Library/Application Support/Mailspring/packages/`
-- **Linux**: `~/.config/Mailspring/packages/`
-- **Windows**: `%APPDATA%/Mailspring/packages/`
+- **macOS**: `~/Library/Application Support/Lyng/packages/`
+- **Linux**: `~/.config/Lyng/packages/`
+- **Windows**: `%APPDATA%/Lyng/packages/`
 
 ### Theme Structure
 

@@ -1,6 +1,6 @@
 # Plugin Development Skill
 
-Use this skill when working on code related to Mailspring's plugin system, including:
+Use this skill when working on code related to Lyng's plugin system, including:
 - Creating, modifying, or debugging plugins/packages
 - Working with the PackageManager or Package classes
 - Modifying plugin loading, discovery, or activation logic
@@ -14,7 +14,7 @@ Use this skill when working on code related to Mailspring's plugin system, inclu
 Before making changes to plugin-related code, you MUST read the plugin system architecture documentation:
 
 ```
-/home/user/Mailspring/PLUGIN_SYSTEM_ARCHITECTURE.md
+PLUGIN_SYSTEM_ARCHITECTURE.md
 ```
 
 This document contains comprehensive information about:
@@ -52,7 +52,7 @@ When working on plugin functionality, these are the primary files to understand:
 
 ## Testing Plugin Changes
 
-- Use `npm start` to run in dev mode (uses `Mailspring-dev` config directory)
+- Use `npm start` to run in dev mode (uses `Lyng-dev` config directory)
 - Hot reload with `Ctrl+R` / `Cmd+R`
 - Access `$m` in dev console for `mailspring-exports`
-- User plugins go in `~/.config/Mailspring-dev/packages/` during development
+- User plugins go in `~/.config/Lyng-dev/packages/` during development

@@ -200,7 +200,7 @@ exports.existsSync = () => fs.existsSync(updateDotExe);
 function registerAppUserModelId(callback) {
   const aumid = 'com.squirrel.mailspring.mailspring';
   const displayName = 'Lyng';
-  const iconPath = path.join(appFolder, 'resources', 'mailspring-square.ico');
+  const iconPath = path.join(appFolder, 'resources', 'lyng-square.ico');
 
   let regPath = 'reg.exe';
   if (process.env.SystemRoot) {
@@ -304,7 +304,7 @@ exports.handleSquirrelInstall = (app) => {
     'Desktop',
     'Lyng.lnk'
   );
-  const iconPath = path.join(appFolder, 'resources', 'mailspring-square.ico');
+  const iconPath = path.join(appFolder, 'resources', 'lyng-square.ico');
 
   const shortcutOptions = {
     target: updateDotExe,

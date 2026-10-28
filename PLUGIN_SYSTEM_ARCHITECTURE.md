@@ -1,6 +1,6 @@
-# Mailspring Plugin System Architecture
+# Lyng Plugin System Architecture
 
-This document provides a comprehensive overview of the Mailspring plugin system for developers looking to understand, extend, or improve the plugin infrastructure.
+This document provides a comprehensive overview of the Lyng plugin system for developers looking to understand, extend, or improve the plugin infrastructure.
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ This document provides a comprehensive overview of the Mailspring plugin system 
 
 ## Overview
 
-Mailspring uses a robust plugin architecture where features are implemented as "packages". The system is managed by two core files:
+Lyng uses a robust plugin architecture where features are implemented as "packages". The system is managed by two core files:
 
 | File | Purpose |
 |------|---------|
@@ -35,7 +35,7 @@ Plugins are discovered from these directories in order:
 
 | Directory | Purpose | Notes |
 |-----------|---------|-------|
-| `<resourcePath>/internal_packages/` | Built-in plugins | 51 packages bundled with Mailspring |
+| `<resourcePath>/internal_packages/` | Built-in plugins | 51 packages bundled with Lyng |
 | `<configDirPath>/packages/` | User-installed plugins | Skipped in safe mode |
 | `<configDirPath>/dev/packages/` | Developer mode plugins | Only loaded in dev mode |
 | `<resourcePath>/spec/fixtures/packages/` | Test packages | Only in spec mode |
@@ -44,11 +44,11 @@ Plugins are discovered from these directories in order:
 
 | Platform | Config Directory |
 |----------|------------------|
-| Linux | `~/.config/Mailspring/` |
-| macOS | `~/Library/Application Support/Mailspring/` |
-| Windows | `%APPDATA%\Mailspring\` |
+| Linux | `~/.config/Lyng/` |
+| macOS | `~/Library/Application Support/Lyng/` |
+| Windows | `%APPDATA%\Lyng\` |
 
-In development mode, data is stored separately (e.g., `~/.config/Mailspring-dev/` on Linux).
+In development mode, data is stored separately (e.g., `~/.config/Lyng-dev/` on Linux).
 
 ---
 
@@ -116,7 +116,7 @@ my-plugin/
 | `isOptional` | No | If true, can be disabled by user |
 | `isDefault` | No | If true, enabled by default |
 | `syncInit` | No | If true, loads immediately during startup |
-| `isIdentityRequired` | No | If true, requires Mailspring account to activate |
+| `isIdentityRequired` | No | If true, requires an account to activate |
 | `theme` | No | Set to `"ui"` for theme plugins |
 
 ### Window Types
@@ -388,8 +388,8 @@ AppEnv.packages.createPackageManually();
 ### Manual Installation
 
 1. Download/create plugin folder with valid `package.json`
-2. Copy to `~/.config/Mailspring/packages/` (or platform equivalent)
-3. Restart Mailspring (or call `installPackageFromPath()`)
+2. Copy to `~/.config/Lyng/packages/` (or platform equivalent)
+3. Restart Lyng (or call `installPackageFromPath()`)
 
 ### Validation Requirements
 
@@ -483,7 +483,7 @@ Optional plugins can be disabled via config:
 
 - Plugin Starter: https://github.com/Foundry376/Mailspring-Plugin-Starter
 - Theme Starter: https://github.com/Foundry376/Mailspring-Theme-Starter
-- Community: https://community.getmailspring.com/
+- Community: https://github.com/Bojanni050/lyng/issues
 
 ---
 

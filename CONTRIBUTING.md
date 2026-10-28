@@ -1,63 +1,51 @@
-# Contributing to Mailspring
+# Contributing to Lyng
 
-Thanks for checking out Mailspring! We'd love for you to contribute. Whether
+Thanks for checking out Lyng! We'd love for you to contribute. Whether
 you're a first-time open source contributor or an experienced developer, there
-are ways you can help make Mailspring great!
-
-## Contributing Code
-
-One of the best ways is to grab a
-[bug report](https://community.getmailspring.com/c/bugs/10),
-[sync issue](https://community.getmailspring.com/c/sync/22),
-or [feature suggestion](https://community.getmailspring.com/c/features/12)
-that has been marked `accepted` and dig in. You can especially look for issues
-marked as `help-wanted` or `low-hanging-fruit`.
-
-Please be wary of working on issues *not* marked as `accepted`. Just because
-someone has created an issue doesn't mean we'll accept a pull request for it.
-See [Where to Contribute](#where-to-contribute) below for more information.
-
-You can also help implement *any* feature by creating a **plugin** for it!
-If you need inspiration, you can dig through the list of
-[feature suggestions](https://community.getmailspring.com/c/features/12),
-especially looking for anything marked `for-plugin`.
-
-### Pull requests
-
-The first time you submit a pull request, a bot will ask you to sign a
-standard, bare-bones Contributor License Agreement. The CLA states that you
-waive any patent or copyright claims you might have to the code you're
-contributing. (For example, you can't submit a PR and then sue Mailspring
-for using your code.)
-
-## Triaging Issues
-
-Another way to help is to [answer questions](https://community.getmailspring.com/c/help/7),
-or to triage [bug reports](https://community.getmailspring.com/c/bugs/10) and
-[sync issues](https://community.getmailspring.com/c/sync/22). If you're good at
-testing and addressing issues, we'd love your help!
+are ways you can help make Lyng great!
 
 ## Filing Issues
 
-If you have a bug to report or a feature to suggest, you may do so on our
-[Discourse](https://community.getmailspring.com/). Please carefully follow all
-instructions in the template for the given type of issue you're reporting.
+If you have a bug to report or a feature to suggest, please do so on
+[GitHub](https://github.com/Bojanni050/lyng/issues). Use the issue templates,
+follow any instructions they contain, and search for existing issues —
+*including closed ones!* If someone has already reported a bug or requested
+the feature you have in mind, add a 👍 to it. Issues with more reactions are
+more likely to be addressed.
 
-We also ask that you search for existing issues, *including closed ones!*
-We're in the process of migrating. If someone has already reported a bug or
-requested the feature you have in mind,  **vote for it** at the top.
-Higher voted issues are more likely to be addressed.
+For bugs, please verify that you're running the latest version of Lyng and
+include your platform, app version and relevant log output. If you file an
+issue without providing detail, we may close it without comment.
 
-For bugs, please verify that you're running the latest version of Mailspring.
-If you file an issue without providing detail, we may close it without comment.
+## Triaging Issues
 
-**Under no circumstances should you report an issue via GitHub. The GitHub
-Issues feature is exclusively for Mailspring contributors to track tasks
-which have been diagnosed, accepted, and scheduled on the roadmap.**
+Another way to help is to reproduce bug reports, confirm feature requests,
+and point newcomers in the right direction. If you're good at testing and
+addressing issues, we'd love your help!
+
+## Contributing Code
+
+One of the best ways is to grab a bug report or feature suggestion that has
+been labelled `accepted` or `help-wanted` and dig in.
+
+Please be wary of working on issues *not* marked as `accepted`. Just because
+someone has created an issue doesn't mean we'll accept a pull request for it.
+If the issue you want to work on is not labelled, leave a comment asking
+whether an external contribution will be considered.
+
+You can also help implement *any* feature by creating a **plugin** for it!
+If you need inspiration, look through the open feature requests, especially
+anything marked `for-plugin`.
+
+### Pull requests
+
+Before submitting, run `npm run lint` (prettier + eslint) and make sure the
+CI checks pass. Keep pull requests focused: one clear change per PR is much
+easier to review.
 
 # Build and Run From Source
 
-If you want to understand how Mailspring works or want to debug an issue,
+If you want to understand how Lyng works or want to debug an issue,
 you'll want to get the source, build it, and run it locally.
 
 ## Installing Prerequisites
@@ -86,41 +74,44 @@ is also highly recommended. Based on your platform, you'll also need:
   - On Red Hat-based Linux: `sudo yum install libX11-devel.x86_64 libxkbfile-devel.x86_64 libsecret-1-dev libsecret-devel`.
 
 After you have these tools installed, run the following commands to check out
-Mailspring,install dependencies, and launch the app:
+Lyng, install dependencies, and launch the app:
 
 ```
-git clone https://github.com/foundry376/mailspring
-cd mailspring
+git clone https://github.com/Bojanni050/lyng
+cd lyng
 npm install
 npm start
 ```
 
-### The Mailsync binary
+### The mailsync binary
 
-Mailspring's sync engine ([Mailsync](https://github.com/Foundry376/Mailspring-Sync))
-is a separate C++ program that the app spawns per account. You don't need to build
-it: the `postinstall` step of `npm install` downloads the prebuilt `mailsync`
-binary matching the `mailsync` submodule's pinned commit from S3 and unpacks it
-into `./app`. If you've checked out the submodule (`git submodule update --init`)
-in order to work on the sync engine, postinstall skips the download and expects you
-to build it yourself; remove the submodule checkout and re-run `npm run postinstall`
-to go back to the prebuilt binary.
+Lyng's sync engine ([mailsync](https://github.com/Bojanni050/Mailspring-Sync),
+inherited from Mailspring) is a separate C++ program that the app spawns per
+account. You don't need to build it: `npm install` prints a reminder if the
+engine is missing, and `npm run fetch-mailsync` downloads this fork's prebuilt
+`mailsync` binary for your platform from the [Mailspring-Sync release
+page](https://github.com/Bojanni050/Mailspring-Sync/releases) and unpacks it
+into `./app`. Upstream Mailspring prebuilts deliberately don't work here: they
+carry a path gate that a renamed build cannot satisfy. If you've checked out
+the submodule (`git submodule update --init`) in order to work on the sync
+engine, build and install it yourself; remove the submodule checkout and re-run
+`npm run fetch-mailsync` to go back to the prebuilt binary.
 
 ## Development Workflow
 
 ### App Data
 
-When you're running Mailspring with `npm start`, it runs with the `--dev` flag
-and user data is located in a `Mailspring-dev` folder alongside the regular
+When you're running Lyng with `npm start`, it runs with the `--dev` flag
+and user data is located in a `Lyng-dev` folder alongside the regular
 settings folder:
 
-- Mac: `~/Library/Application Support/Mailspring-dev`
-- Windows: `C:\Users\<you>\AppData\Roaming\Mailspring-dev`
-- Linux: `~/.config/Mailspring-dev/`
+- Mac: `~/Library/Application Support/Lyng-dev`
+- Windows: `C:\Users\<you>\AppData\Roaming\Lyng-dev`
+- Linux: `~/.config/Lyng-dev/`
 
 ### Developer Tools
 
-From Mailspring, you can open the Developer Tools from the
+From Lyng, you can open the Developer Tools from the
 menu: `Menu > Developer > Toggle Developer Tools`. Here are a few tips for
 getting started:
 
@@ -129,7 +120,7 @@ getting started:
 - On the console, `$m` is a shorthand for `mailspring-exports`, and allows you
   to access global `Stores` and `Model` classes.
 
-- You don't need to stop and restart the development version of Mailspring
+- You don't need to stop and restart the development version of Lyng
   after each change. You can just reload the window via `CTRL+R` (Windows/Linux)
   or `CMD+R` (macOS).
 
@@ -142,9 +133,9 @@ submitting a pull request to ensure the CI servers accept your code.
 ### Documentation
 
 Back in 2015 and 2016, the Nylas Mail team made a huge effort to document
-the codebase. The docs are still
-[available on GitHub pages](https://foundry376.github.io/Mailspring/), and are
-still largely relevant to Mailspring development.
+the codebase. The plugin SDK docs live in
+[`app/build/docs_src/`](app/build/docs_src/SUMMARY.md) and are still largely
+relevant to Lyng development.
 
 ### Testing Localization
 
@@ -154,31 +145,26 @@ to use the `--` argument forwarding syntax: `npm start -- --lang=de`.
 
 # Where to Contribute
 
-Check out our [Discourse](https://community.getmailspring.com/) for all
-potential areas for contributions. Note that just because a topic exists does
-not mean we will accept a contribution to the core mail client for it. There
-are several reasons we may not accepts a pull requests, like:
+There are several reasons a pull request for the core mail client may not be
+accepted, like:
 
 - **Maintainability** - We're _extremely_ wary of adding options and preferences
   for niche behaviors. Email is a wild west, and we can't afford to support
   every possible configuration. Our general rule is that the code complexity
-  of adding a preference isn't worth it unless the user base is fairly evenly
+  of adding a preference isn't worth it unless the users are fairly evenly
   divided about the desired behavior.
-  [We don't want to end up with this!](https://cloud.githubusercontent.com/assets/1037212/14989123/2a74e810-110b-11e6-8b5d-6f343bca712f.png)
 
 - **User experience** - We want to deliver a lightweight and smooth mail
   client, so UX and performance matter a lot. If you'd like to change or
   extend the UI, consider doing it in a plugin or theme.
 
-- **Architectural** - The team and/or feature owner needs to agree with any
-  architectural impact a change may make. Things like new extension APIs must
-  be discussed with and agreed upon by the feature owner. To improve the
+- **Architectural** - Architectural changes need to be agreed upon in the
+  issue first, especially things like new extension APIs. To improve the
   chances to get a pull request merged you should select an issue that is
   labelled with the help-wanted or bug labels.
 
-In short, if the issue you want to work on is not labelled with `accepted`, you
-can start a conversation on the Discourse topic about whether an external
-contribution will be considered.
+In short, if the issue you want to work on is not labelled with `accepted`,
+start a conversation on that issue first.
 
 # Code of Conduct
 

@@ -1,6 +1,6 @@
-# Community Plugins for Mailspring
+# Community Plugins for Lyng
 
-This document lists known third-party plugins for Mailspring found on GitHub.
+This document lists known third-party plugins (built for Mailspring's plugin API, which Lyng inherits) and backend replacements found on GitHub.
 
 ## Official Resources
 
@@ -14,7 +14,7 @@ This document lists known third-party plugins for Mailspring found on GitHub.
 
 | Repository | Description | Stars |
 |------------|-------------|-------|
-| [Striffly/mailspring-avatars](https://github.com/Striffly/mailspring-avatars) | Adds avatars to contacts in Mailspring | ⭐76 |
+| [Striffly/mailspring-avatars](https://github.com/Striffly/mailspring-avatars) | Adds avatars to contacts in Mailspring/Lyng | ⭐76 |
 | [bnesimsysadmin/AI-assistant-mailspring-plugin](https://github.com/bnesimsysadmin/AI-assistant-mailspring-plugin) | AI assistant for composing emails | - |
 | [smartium/Mailspring-Plugin](https://github.com/smartium/Mailspring-Plugin) | Community plugin | - |
 
@@ -55,7 +55,6 @@ This document lists known third-party plugins for Mailspring found on GitHub.
 ## Alternative Backends & Forks
 
 These projects modify or replace Mailspring's backend services:
-
 | Repository | Description | Stars |
 |------------|-------------|-------|
 | [1RandomDev/mailspring-api](https://github.com/1RandomDev/mailspring-api) | Self-hosted reimplementation of the Mailspring Sync backend | ⭐11 |
@@ -79,8 +78,8 @@ To create your own plugin, see:
 ### Plugin Installation
 
 Plugins should be copied or symlinked to:
-- **macOS**: `~/Library/Application Support/Mailspring/packages/`
-- **Linux**: `~/.config/Mailspring/packages/`
-- **Windows**: `%APPDATA%/Mailspring/packages/`
+- **macOS**: `~/Library/Application Support/Lyng/packages/`
+- **Linux**: `~/.config/Lyng/packages/`
+- **Windows**: `%APPDATA%/Lyng/packages/`
 
-You can find this directory by going to **Developer > Show Mailsync Logs** in Mailspring.
+You can find this directory by going to **Developer > Show Mailsync Logs** in Lyng.

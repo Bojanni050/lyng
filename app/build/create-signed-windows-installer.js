@@ -1,9 +1,9 @@
 /* eslint import/no-dynamic-require:0 */
 /**
- * Squirrel generates Update.exe, squirrel.exe and mailspring_ExecutionStub.exe
+ * Squirrel generates Update.exe, squirrel.exe and Lyng_ExecutionStub.exe
  * while building the installer, after the workflow signs the app directory and
  * before it signs the installer. Unsigned, the stub -- which Squirrel installs
- * as %LocalAppData%\Mailspring\mailspring.exe -- trips Smart App Control, so
+ * as %LocalAppData%\Lyng\Lyng.exe -- trips Smart App Control, so
  * pass --signWithParams and let Squirrel sign them itself.
  */
 const fs = require('fs');
@@ -29,7 +29,7 @@ function createVendorDirectory() {
     'vendor'
   );
 
-  const vendorDirectory = path.join(os.tmpdir(), 'mailspring-winstaller-vendor');
+  const vendorDirectory = path.join(os.tmpdir(), 'lyng-winstaller-vendor');
   fs.rmSync(vendorDirectory, { recursive: true, force: true });
   fs.cpSync(bundled, vendorDirectory, { recursive: true });
 
@@ -82,17 +82,17 @@ function verifySigningWorks(vendorDirectory) {
 const config = {
   usePackageJson: false,
   outputDirectory: path.join(appDir, 'dist'),
-  appDirectory: path.join(appDir, 'dist', 'mailspring-win32-x64'),
+  appDirectory: path.join(appDir, 'dist', 'Lyng-win32-x64'),
   loadingGif: path.join(appDir, 'build', 'resources', 'win', 'loading.gif'),
-  iconUrl: 'http://mailspring-builds.s3.amazonaws.com/assets/mailspring-square.ico',
-  description: 'Mailspring',
+  setupIcon: path.join(appDir, 'build', 'resources', 'win', 'lyng-square.ico'),
+  description: 'Lyng',
   version: version,
-  title: 'Mailspring',
+  title: 'Lyng',
   authors: 'Foundry 376, LLC',
-  setupIcon: path.join(appDir, 'build', 'resources', 'win', 'mailspring-square.ico'),
-  setupExe: 'MailspringSetup.exe',
-  exe: 'mailspring.exe',
-  name: 'Mailspring',
+  setupIcon: path.join(appDir, 'build', 'resources', 'win', 'lyng-square.ico'),
+  setupExe: 'LyngSetup.exe',
+  exe: 'Lyng.exe',
+  name: 'Lyng',
 };
 
 if (signWithParams) {
