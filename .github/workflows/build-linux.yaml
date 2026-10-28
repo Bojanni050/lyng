@@ -52,6 +52,11 @@ jobs:
         run: npm ci
         working-directory: .
 
+      # The packager copies whatever mailsync binary sits in app/. postinstall only warns
+      # when it's missing, so fetch this fork's release engine before building.
+      - name: Fetch Sync Engine
+        run: npm run fetch-mailsync
+
       - name: Setup AWS CLI
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

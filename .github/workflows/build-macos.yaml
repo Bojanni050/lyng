@@ -36,6 +36,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      # The packager copies whatever mailsync binary sits in app/. postinstall only warns
+      # when it's missing, so fetch this fork's release engine before building.
+      - name: Fetch Sync Engine
+        run: npm run fetch-mailsync
+
       - name: Setup Codesigning
         uses: apple-actions/import-codesign-certs@v7
         with:
