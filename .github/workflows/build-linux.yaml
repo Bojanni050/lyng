@@ -95,34 +95,6 @@ jobs:
           path: app/dist/*.rpm
           retention-days: 1
 
-  build-snap:
-    needs: build
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Fail if branch is not master
-        if: github.ref != 'refs/heads/main'
-        run: |
-          echo "This workflow can only be run on master branch to ensure code-signed builds come from merged PRs"
-          exit 1
-
-      - uses: actions/checkout@v7
-
-      - name: Download DEB artifact
-        uses: actions/download-artifact@v8
-        with:
-          name: lyng-deb
-          path: app/dist/
-
-      - uses: snapcore/action-build@v1
-        id: build-snap
-
-      - uses: snapcore/action-publish@v1
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-        with:
-          snap: ${{ steps.build-snap.outputs.snap }}
-          release: edge
-
   test-ubuntu:
     needs: build
     runs-on: ubuntu-22.04
