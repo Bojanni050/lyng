@@ -12,7 +12,7 @@ function getCurrentWindow() {
 
 function getCorrectTitle() {
   const thread = MessageStore.thread();
-  return 'Nuntio' + (thread ? ' · ' + thread.subject : '');
+  return 'Lyng' + (thread ? ' · ' + thread.subject : '');
 }
 
 let styleText: string | null = null;
@@ -47,7 +47,7 @@ function patchWindowTitle() {
     originalSetTitle = win.setTitle.bind(win);
     win.setTitle = (title: string) => {
       if (enabled) {
-        originalSetTitle('Nuntio');
+        originalSetTitle('Lyng');
       } else {
         originalSetTitle(title);
       }
@@ -55,7 +55,7 @@ function patchWindowTitle() {
   }
 
   if (enabled) {
-    originalSetTitle('Nuntio');
+    originalSetTitle('Lyng');
   } else {
     originalSetTitle(getCorrectTitle());
   }

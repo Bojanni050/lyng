@@ -148,7 +148,7 @@ export const switchPreferencesTab = create('switchPreferencesTab', ActionScopeGl
 /*
   Public: Manage the Mailspring identity
   */
-export const logoutMailspringIdentity = create('logoutNuntioIdentity', ActionScopeWindow);
+export const logoutMailspringIdentity = create('logoutLyngIdentity', ActionScopeWindow);
 
 /*
   Public: Remove the selected account

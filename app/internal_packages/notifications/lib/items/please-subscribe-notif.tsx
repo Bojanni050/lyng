@@ -34,10 +34,10 @@ export default class PleaseSubscribeNotification extends React.Component<
 
     let msg = null;
     if (stripePlan === 'Basic' && accountCount > 4) {
-      msg = localized(`Please consider paying for Nuntio Pro!`);
+      msg = localized(`Please consider paying for Lyng Pro!`);
     }
     if (stripePlan !== stripePlanEffective) {
-      msg = localized(`We're having trouble billing your Nuntio subscription.`);
+      msg = localized(`We're having trouble billing your Lyng subscription.`);
     }
 
     return { msg };

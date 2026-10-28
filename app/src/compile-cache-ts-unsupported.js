@@ -14,7 +14,7 @@ function showDialog(filePath) {
       : require('electron').dialog;
   dialog.showErrorBox(
     'Plugin must be compiled',
-    `Nuntio no longer ships with a TypeScript compiler to recompile plugins on the fly. ` +
+    `Lyng no longer ships with a TypeScript compiler to recompile plugins on the fly. ` +
       `Ask the plugin developer to compile the plugin to vanilla JavaScript as a pre-publish step.` +
       `\n\nFile: ${filePath}`
   );
@@ -27,7 +27,7 @@ function showDialog(filePath) {
     value: (module, filePath) => {
       showDialog(filePath);
       throw new Error(
-        `Cannot load ${filePath}: Nuntio no longer ships with a TypeScript compiler. ` +
+        `Cannot load ${filePath}: Lyng no longer ships with a TypeScript compiler. ` +
           `Plugins must be compiled to vanilla JavaScript as a pre-publish step.`
       );
     },

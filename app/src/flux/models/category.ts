@@ -36,7 +36,7 @@ const HiddenRoleMap = ToObject([
   'starred',
   'important',
   'snoozed',
-  '[Nuntio]',
+  '[Lyng]',
 ]);
 
 /*
@@ -77,12 +77,12 @@ export class Category extends Model {
   get displayName() {
     const decoded = imapUtf7.decode(this.path) as string;
 
-    for (const prefix of ['INBOX', '[Gmail]', '[Nuntio]']) {
+    for (const prefix of ['INBOX', '[Gmail]', '[Lyng]']) {
       if (decoded.startsWith(prefix) && decoded.length > prefix.length + 1) {
         return decoded.substr(prefix.length + 1); // + delimiter
       }
     }
-    if (decoded.startsWith('Nuntio/') || decoded.startsWith('Nuntio.')) {
+    if (decoded.startsWith('Lyng/') || decoded.startsWith('Lyng.')) {
       return decoded.substr(11);
     }
     if (decoded === 'INBOX') {

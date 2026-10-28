@@ -339,12 +339,12 @@ class AttachmentStore extends MailspringStore {
     let message = null;
     if (['EPERM', 'EROFS', 'EPIPE', 'EBUSY', 'EMFILE', 'EACCES', 'UNKNOWN'].includes(error.code)) {
       message = localized(
-        'Nuntio could not save an attachment. Check that permissions are set correctly and try restarting Nuntio if the issue persists.'
+        'Lyng could not save an attachment. Check that permissions are set correctly and try restarting Lyng if the issue persists.'
       );
     }
     if (['ENOSPC'].includes(error.code)) {
       message = localized(
-        'Nuntio could not save an attachment because you have run out of disk space.'
+        'Lyng could not save an attachment because you have run out of disk space.'
       );
     }
 

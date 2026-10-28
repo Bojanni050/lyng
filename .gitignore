@@ -87,3 +87,9 @@ app/package-lock.json
 app/libetpan.pdb
 app/mailcore2.pdb
 app/mailsync.pdb
+
+# Lokale design-asset shakes (niet in repo)
+/Nuntio-logo.zip
+app/build/resources/win/Gemini_Generated_Image_*.jpg
+app/build/resources/win/Nuntio*.png
+app/build/resources/win/Lyng*.png

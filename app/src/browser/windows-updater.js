@@ -199,7 +199,7 @@ exports.existsSync = () => fs.existsSync(updateDotExe);
 // Registry path: HKEY_CURRENT_USER\SOFTWARE\Classes\AppUserModelId\{AUMID}
 function registerAppUserModelId(callback) {
   const aumid = 'com.squirrel.mailspring.mailspring';
-  const displayName = 'Nuntio';
+  const displayName = 'Lyng';
   const iconPath = path.join(appFolder, 'resources', 'mailspring-square.ico');
 
   let regPath = 'reg.exe';
@@ -297,12 +297,12 @@ exports.handleSquirrelInstall = (app) => {
     'Windows',
     'Start Menu',
     'Programs',
-    'Nuntio.lnk'
+    'Lyng.lnk'
   );
   const desktopPath = path.join(
     process.env.USERPROFILE || process.env.HOME,
     'Desktop',
-    'Nuntio.lnk'
+    'Lyng.lnk'
   );
   const iconPath = path.join(appFolder, 'resources', 'mailspring-square.ico');
 
@@ -347,7 +347,7 @@ exports.handleSquirrelInstall = (app) => {
     '/t',
     'REG_SZ',
     '/d',
-    'Nuntio',
+    'Lyng',
     '/f',
   ]);
   if (fs.existsSync(iconPath)) {
@@ -393,12 +393,12 @@ exports.handleSquirrelUninstall = (app) => {
     'Windows',
     'Start Menu',
     'Programs',
-    'Nuntio.lnk'
+    'Lyng.lnk'
   );
   const desktopPath = path.join(
     process.env.USERPROFILE || process.env.HOME,
     'Desktop',
-    'Nuntio.lnk'
+    'Lyng.lnk'
   );
 
   try {

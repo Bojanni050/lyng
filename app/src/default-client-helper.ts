@@ -35,7 +35,7 @@ export class DefaultClientHelperWindows implements DCH {
               callback(err1 || err2);
               return;
             }
-            callback(output.includes('Nuntio'));
+            callback(output.includes('Lyng'));
           }
         );
       }
@@ -46,10 +46,10 @@ export class DefaultClientHelperWindows implements DCH {
     // On Windows 11 21H2+ (with April 2023 update), we can deep link directly to Mailspring's
     // default app settings page. On older Windows versions, this falls back to the main
     // Default Apps page, which is still better than opening a web browser.
-    shell.openExternal('ms-settings:defaultapps?registeredAppUser=Nuntio').catch((err) => {
+    shell.openExternal('ms-settings:defaultapps?registeredAppUser=Lyng').catch((err) => {
       AppEnv.showErrorDialog({
         title: localized('Failed to Open Settings'),
-        message: localized('Nuntio was unable to open Windows Settings.\n\n%@', err.message),
+        message: localized('Lyng was unable to open Windows Settings.\n\n%@', err.message),
       });
     });
   }
@@ -78,19 +78,19 @@ export class DefaultClientHelperWindows implements DCH {
             type: 'info',
             buttons: [localized('Open Settings'), localized('Cancel')],
             defaultId: 0,
-            message: localized('Visit Windows Settings to finish making Nuntio your mail client'),
+            message: localized('Visit Windows Settings to finish making Lyng your mail client'),
             detail: localized(
-              "Click 'Open Settings' to open Windows Settings where you can set Nuntio as your default email app."
+              "Click 'Open Settings' to open Windows Settings where you can set Lyng as your default email app."
             ),
           });
           if (response === 0) {
             // On Windows 11 21H2+ (with April 2023 update), this deep links directly to
             // Mailspring's default app settings. On older versions, falls back to Default Apps.
-            shell.openExternal('ms-settings:defaultapps?registeredAppUser=Nuntio').catch((err) => {
+            shell.openExternal('ms-settings:defaultapps?registeredAppUser=Lyng').catch((err) => {
               AppEnv.showErrorDialog({
                 title: localized('Failed to Open Settings'),
                 message: localized(
-                  'Nuntio was unable to open Windows Settings.\n\n%@',
+                  'Lyng was unable to open Windows Settings.\n\n%@',
                   err.message
                 ),
               });
@@ -146,14 +146,14 @@ export class DefaultClientHelperMac implements DCH {
   resetURLScheme(scheme: string, callback = (error?: Error) => {}) {
     const success = require('@electron/remote').app.removeAsDefaultProtocolClient(scheme);
     return callback(
-      success ? null : new Error(`Failed to remove Nuntio as default handler for ${scheme}`)
+      success ? null : new Error(`Failed to remove Lyng as default handler for ${scheme}`)
     );
   }
 
   registerForURLScheme(scheme: string, callback = (error?: Error) => {}) {
     const success = require('@electron/remote').app.setAsDefaultProtocolClient(scheme);
     return callback(
-      success ? null : new Error(`Failed to set Nuntio as default handler for ${scheme}`)
+      success ? null : new Error(`Failed to set Lyng as default handler for ${scheme}`)
     );
   }
 }

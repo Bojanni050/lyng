@@ -48,7 +48,7 @@ export default class UpdateNotification extends React.Component<
   };
 
   _onViewChangelog = () => {
-    shell.openExternal('https://github.com/Bojanni050/nuntio/releases/latest');
+    shell.openExternal('https://github.com/Bojanni050/lyng/releases/latest');
   };
 
   render() {
@@ -61,8 +61,8 @@ export default class UpdateNotification extends React.Component<
       <Notification
         priority="4"
         title={localized(
-          `An update to Nuntio is available %@`,
-          version ? `(${version.replace('Nuntio', '').trim()})` : ''
+          `An update to Lyng is available %@`,
+          version ? `(${version.replace('Lyng', '').trim()})` : ''
         )}
         subtitle={localized('View changelog')}
         subtitleAction={this._onViewChangelog}

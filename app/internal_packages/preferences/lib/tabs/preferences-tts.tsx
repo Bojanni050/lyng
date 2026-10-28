@@ -17,7 +17,7 @@ import { ConfigLike } from '../types';
 import ModelPicker from './model-picker';
 
 const TEST_SENTENCE =
-  'This is Nuntio. New messages can be read aloud like this, using the provider you configured here.';
+  'This is Lyng. New messages can be read aloud like this, using the provider you configured here.';
 
 type PreferencesTTSState = {
   provider: string;
@@ -278,7 +278,7 @@ class PreferencesTTS extends React.Component<{ config: ConfigLike }, Preferences
           </div>
           <div className="ai-hint">
             {localized(
-              'Stored in your local Nuntio settings file. The chat key above is not reused here.'
+              'Stored in your local Lyng settings file. The chat key above is not reused here.'
             )}
           </div>
         </div>

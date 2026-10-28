@@ -40,7 +40,7 @@ type PreferencesAIState = {
 };
 
 /**
- * Settings for the hosted AI provider Nuntio uses for its AI features.
+ * Settings for the hosted AI provider Lyng uses for its AI features.
  *
  * The provider is configured as an OpenAI-compatible endpoint (base URL + key) so DeepInfra,
  * Mistral and any other compatible service work the same way. Model metadata is fetched on
@@ -214,7 +214,7 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
         <h6>{localized('AI provider')}</h6>
         <p>
           {localized(
-            'Nuntio talks to any OpenAI-compatible AI service. Pick a preset or enter another base URL.'
+            'Lyng talks to any OpenAI-compatible AI service. Pick a preset or enter another base URL.'
           )}
         </p>
 
@@ -242,7 +242,7 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
           />
           <div className="ai-hint">
             {localized(
-              'The API root, without /models or /chat/completions. Nuntio appends those itself.'
+              'The API root, without /models or /chat/completions. Lyng appends those itself.'
             )}
           </div>
         </div>
@@ -269,7 +269,7 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
           </div>
           <div className="ai-hint">
             {localized(
-              'Stored in your local Nuntio settings file. It never leaves this machine except in requests to the provider.'
+              'Stored in your local Lyng settings file. It never leaves this machine except in requests to the provider.'
             )}
           </div>
           {preset && !preset.publishesPricing ? (

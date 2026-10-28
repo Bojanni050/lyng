@@ -160,8 +160,8 @@ module.exports = ErrorLogger = (function () {
       return;
     }
     require('electron').crashReporter.start({
-      productName: 'Nuntio',
-      companyName: 'Nuntio',
+      productName: 'Lyng',
+      companyName: 'Lyng',
       submitURL: `https://id.getmailspring.com/report-crash?ver=${appVersion}&platform=${process.platform}`,
       uploadToServer: true,
       autoSubmit: true,

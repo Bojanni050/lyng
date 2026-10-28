@@ -1,11 +1,11 @@
-# Nuntio
+# Lyng
 
 A local-first mail client for macOS, Windows and Linux, built on the Mailspring codebase.
 
-**Credits and licence.** Nuntio is a fork of [Mailspring](https://github.com/Foundry376/Mailspring)
+**Credits and licence.** Lyng is a fork of [Mailspring](https://github.com/Foundry376/Mailspring)
 by Foundry376 and its contributors, and stays under **GPL-3.0** (see `LICENSE.md`). The changes this
-fork makes are listed in [`NUNTIO.md`](NUNTIO.md) — that list is the "state your changes" part of
-GPL §5a. The name and logo are Nuntio's own; nothing here is endorsed by or affiliated with the
+fork makes are listed in [`LYNG.md`](LYNG.md) — that list is the "state your changes" part of
+GPL §5a. The name and logo are Lyng's own; nothing here is endorsed by or affiliated with the
 Mailspring project.
 
 Functionally this build does two things differently: the pro features that only needed client code
@@ -13,7 +13,7 @@ Functionally this build does two things differently: the pro features that only 
 tracking talks to a self-hosted server instead of the vendor's. Translation, contact enrichment and
 thread sharing are switched off — they need a server this fork does not ship.
 
-The original project README follows, still accurate for everything not listed in `NUNTIO.md`.
+The original project README follows, still accurate for everything not listed in `LYNG.md`.
 
 ---
 

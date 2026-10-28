@@ -105,7 +105,7 @@ export async function makeRequest({
   IdentityStore = IdentityStore || require('./stores/identity-store').IdentityStore;
   const identity = IdentityStore.identity();
   if (!identity) {
-    throw new Error('makeRequest: A Nuntio identity is required.');
+    throw new Error('makeRequest: A Lyng identity is required.');
   }
 
   const init: RequestInit = { ...rest };

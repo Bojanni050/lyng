@@ -8,7 +8,7 @@ import OpenTrackingComposerExtension from './open-tracking-composer-extension';
 const OpenTrackingButtonWithTutorialTip = HasTutorialTip(OpenTrackingButton, {
   title: localized('See when recipients open this email'),
   instructions: localized(
-    'When enabled, Nuntio will notify you as soon as someone reads this message. Sending to a group? Nuntio shows you which recipients opened your email so you can follow up with precision.'
+    'When enabled, Lyng will notify you as soon as someone reads this message. Sending to a group? Lyng shows you which recipients opened your email so you can follow up with precision.'
   ),
 });
 

@@ -235,7 +235,7 @@ export default class ApplicationMenu {
   getDefaultTemplate() {
     return [
       {
-        label: 'Nuntio',
+        label: 'Lyng',
         submenu: [
           { label: localized('Check for Updates'), metadata: { autoUpdate: true } },
           {

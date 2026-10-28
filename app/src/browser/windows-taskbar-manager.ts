@@ -57,7 +57,7 @@ class WindowsTaskbarManager {
             {
               type: 'task',
               title: localized('Preferences'),
-              description: localized('Open Nuntio preferences'),
+              description: localized('Open Lyng preferences'),
               program: process.execPath,
               args: 'mailspring://open-preferences',
               iconPath: process.execPath,

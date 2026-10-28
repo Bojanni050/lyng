@@ -37,7 +37,7 @@ export function exportCsv(
       AppEnv.showErrorDialog({
         title: localized('Export Failed'),
         message: localized(
-          `Nuntio was unable to write to the file location you specified (%@).` +
+          `Lyng was unable to write to the file location you specified (%@).` +
             `Try choosing another location.\n\n%@`,
           filepath,
           err.toString()

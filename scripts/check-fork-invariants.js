@@ -30,11 +30,11 @@ function readJSON(relativePath) {
 const appPackagePath = 'app/package.json';
 check({
   file: appPackagePath,
-  expected: 'name is "nuntio" and productName is "Nuntio"',
-  why: 'The package identity and profile directory must remain Nuntio-branded.',
+  expected: 'name is "lyng" and productName is "Lyng"',
+  why: 'The package identity and profile directory must remain Lyng-branded.',
   passes: () => {
     const pkg = readJSON(appPackagePath);
-    return pkg.name === 'nuntio' && pkg.productName === 'Nuntio';
+    return pkg.name === 'lyng' && pkg.productName === 'Lyng';
   },
 });
 
@@ -68,7 +68,7 @@ for (const name of identityFreePackages) {
   check({
     file,
     expected: 'isIdentityRequired is absent or false',
-    why: `${name} is usable without a Mailspring account in Nuntio.`,
+    why: `${name} is usable without a Mailspring account in Lyng.`,
     passes: () => readJSON(file).isIdentityRequired !== true,
   });
 }
@@ -78,7 +78,7 @@ for (const name of ['open-tracking', 'link-tracking']) {
   check({
     file,
     expected: 'development, staging, and production serverUrl values are non-vendor URLs',
-    why: `${name} must send tracking events to the Nuntio tracking service, not Mailspring.`,
+    why: `${name} must send tracking events to the Lyng tracking service, not Mailspring.`,
     passes: () => {
       const urls = readJSON(file).serverUrl;
       return (
@@ -93,7 +93,7 @@ for (const name of ['open-tracking', 'link-tracking']) {
 check({
   file: '.gitmodules',
   expected: 'mailsync submodule URL points to Bojanni050/Mailspring-Sync',
-  why: 'Nuntio requires the engine fork with the Mailspring executable-path gate removed.',
+  why: 'Lyng requires the engine fork with the Mailspring executable-path gate removed.',
   passes: () =>
     /url\s*=\s*https:\/\/github\.com\/Bojanni050\/Mailspring-Sync\.git/.test(read('.gitmodules')),
 });
@@ -102,7 +102,7 @@ const postinstallPath = 'scripts/postinstall.js';
 check({
   file: postinstallPath,
   expected: 'does not download from mailspring-builds.s3.amazonaws.com',
-  why: 'The upstream binary contains a path gate that prevents the Nuntio engine from starting.',
+  why: 'The upstream binary contains a path gate that prevents the Lyng engine from starting.',
   passes: () => !/mailspring-builds\.s3\.amazonaws\.com/i.test(read(postinstallPath)),
 });
 check({
@@ -118,10 +118,10 @@ if (failures.length > 0) {
     console.error(`      expected: ${failure.expected}`);
     console.error(`      why: ${failure.why}`);
     if (failure.error) console.error(`      error: ${failure.error}`);
-    console.error('      see: NUNTIO.md');
+    console.error('      see: LYNG.md');
   }
   console.error(`\n${failures.length} of ${checkCount} fork invariants failed.`);
   process.exitCode = 1;
 } else {
-  console.log(`PASS  all ${checkCount} Nuntio fork invariants hold.`);
+  console.log(`PASS  all ${checkCount} Lyng fork invariants hold.`);
 }
