@@ -18,13 +18,14 @@ import { secureStorage } from '../key-manager';
 
 const SECRET_BLOB_KEY = 'credentials-ai';
 
-export type SecretScope = 'ai' | 'tts' | 'stt';
+export type SecretScope = 'ai' | 'tts' | 'stt' | 'translation';
 
 /** Where each key lived before it moved into the encrypted blob. */
 export const SECRET_LEGACY_KEYS: { [scope in SecretScope]: string } = {
   ai: 'core.ai.apiKey',
   tts: 'core.tts.apiKey',
   stt: 'core.stt.apiKey',
+  translation: 'core.trans.apiKey',
 };
 
 const CACHE: { [scope in SecretScope]?: string } = {};

@@ -17,6 +17,7 @@ import { ConfigLike } from '../types';
 import ModelPicker from './model-picker';
 import PreferencesTTS from './preferences-tts';
 import PreferencesSTT from './preferences-stt';
+import PreferencesTranslation from './preferences-translation';
 
 const PROVIDER_KEY = AI_CONFIG_KEYS.provider;
 const BASE_URL_KEY = AI_CONFIG_KEYS.baseUrl;
@@ -409,6 +410,7 @@ class PreferencesAI extends React.Component<{ config: ConfigLike }, PreferencesA
         </div>
         <PreferencesTTS config={this.props.config} />
         <PreferencesSTT config={this.props.config} />
+        <PreferencesTranslation config={this.props.config} />
       </div>
     );
   }

@@ -1,12 +1,8 @@
 import { LRUCache } from 'lru-cache';
-import {
-  QuotedHTMLTransformer,
-  localized,
-  Actions,
-  MailspringAPIRequest,
-  RegExpUtils,
-  FeatureLexicon,
-} from 'mailspring-exports';
+import { QuotedHTMLTransformer, localized, RegExpUtils } from 'mailspring-exports';
+
+import { translateBlocks } from '../../../src/ai/translation';
+import { isTranslationConfigured, readTranslationConfig } from '../../../src/ai/config';
 
 export const TranslatePopupOptions = {
   English: 'en',
@@ -119,14 +115,6 @@ export const AllLanguages = {
   ms: 'Malay',
 };
 
-export const TranslationsUsedLexicon: FeatureLexicon = {
-  headerText: localized('All Translations Used'),
-  rechargeText: `${localized(
-    'You can translate up to %1$@ emails each %2$@ with Lyng Basic.'
-  )} ${localized('Upgrade to Pro today!')}`,
-  iconUrl: 'mailspring://translation/assets/ic-translation-modal@2x.png',
-};
-
 function forEachTranslatableText(doc: Document, callback: (el: Node, text: string) => void) {
   const textWalker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
   const urlRegexp = RegExpUtils.urlRegex({ matchStartOfString: true, matchTailOfString: true });
@@ -193,6 +181,17 @@ export async function translateMessageBody(
   targetLang?: string,
   silent = false
 ): Promise<string | false> {
+  if (!isTranslationConfigured()) {
+    if (!silent) {
+      AppEnv.showErrorDialog({
+        title: localized('Translation is Not Configured'),
+        message: localized(
+          'Add a translation provider in Preferences › AI › Translation to translate messages.'
+        ),
+      });
+    }
+    return false;
+  }
   if (translatedSnippetLang !== targetLang) {
     translatedSnippetCache.clear();
     translatedSnippetLang = targetLang;
@@ -201,81 +200,74 @@ export async function translateMessageBody(
   const replyHtml = QuotedHTMLTransformer.removeQuotedHTML(html);
 
   // break the document down into text blocks to translate. We don't send the HTML
-  // because translation services bill by the character and it's unclear if a giant
+  // because translation providers bill by the character and it's unclear if a giant
   // <style> tag counts.
   const domParser = new DOMParser();
   const doc = domParser.parseFromString(replyHtml, 'text/html');
-  const translationDoc = document.createElement('div');
 
-  // Iterate over the HTML document and pull out text blocks we need to translate via the API
-
-  // because LRU cache can change while the req is in flight
-  const skipped: { [text: string]: string } = {};
+  // Collect every translatable node in document order, in one pass, so each translation
+  // result lands on exactly the node it was requested for. A copy the cache answers with
+  // `cached`, and nodes past the per-message character budget with `overLimit`; nothing is
+  // removed from `entries`, so every block sent to the provider stays positionally aligned.
+  const entries: { node: Node; text: string; cached?: string; overLimit?: boolean }[] = [];
   let totalChars = 0;
 
   forEachTranslatableText(doc, (node, text) => {
-    const t = translatedSnippetCache.get(text);
-    if (t) {
-      skipped[text] = t;
-      return;
-    }
-    if (totalChars > 5000) {
-      return;
-    }
-    const b = document.createElement('b');
-    b.textContent = text;
-    totalChars += text.length + 7; // <b></b>;
-    translationDoc.appendChild(b);
+    const cached = translatedSnippetCache.get(text);
+    const overLimit = totalChars > 5000;
+    if (!cached && !overLimit) totalChars += text.length + 7; // <b></b>, as the old server billed
+    entries.push({
+      node,
+      text,
+      ...(cached ? { cached } : {}),
+      ...(overLimit ? { overLimit } : {}),
+    });
   });
 
-  let resultElements = [];
+  const srcIndices: number[] = [];
+  const blocks: string[] = [];
+  entries.forEach((entry, index) => {
+    if (entry.cached !== undefined || entry.overLimit) return;
+    srcIndices.push(index);
+    blocks.push(entry.text);
+  });
+
+  let results: string[] = [];
 
   // Make the translation request
-  if (translationDoc.childElementCount > 0) {
-    const translationHTML = translationDoc.innerHTML.replace(/&nbsp;/g, ' '); // nbsp char
-
-    let response = null;
+  if (blocks.length > 0) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
     try {
-      response = await MailspringAPIRequest.makeRequest({
-        server: 'identity',
-        method: 'POST',
-        path: `/api/translate`,
-        json: true,
-        body: { lang: targetLang, text: translationHTML, format: 'html' },
-        timeout: 5000,
+      results = await translateBlocks({
+        blocks,
+        targetLang,
+        config: readTranslationConfig(),
+        signal: controller.signal,
       });
     } catch (error) {
-      Actions.closePopover();
+      clearTimeout(timeout);
       if (!silent) {
         AppEnv.showErrorDialog({
           title: localized('Language Conversion Failed'),
-          message: error.toString(),
+          message: (error as Error)?.message || error.toString(),
         });
       }
       return false;
     }
-
-    const resultDoc = domParser.parseFromString(response.result, 'text/html');
-    resultElements = Array.from(resultDoc.querySelectorAll('b'));
+    clearTimeout(timeout);
   }
 
-  // Merge the results back in to the original document by traversing it in the same order
-  // and inserting the result back in. Note that we have saved our cache hits into `skipped`
-  // and read them from there to be 100% sure the translation indexes still align with the doc.
-  forEachTranslatableText(doc, (node, text) => {
-    if (skipped[text]) {
-      node.textContent = skipped[text];
-    } else {
-      const resultElement = resultElements.shift();
-      if (resultElement) {
-        const translated = resultElement.textContent;
-        node.textContent = translated;
-        translatedSnippetCache.set(text, translated);
-      } else {
-        // we may have hit the `totalChars` per-email translation limit.
-        // nothing more to do here!
-      }
-    }
+  // Merge the results back in order: srcIndices[i] names the entries slot that produced
+  // blocks[i], and the cached answers fill the rest from the LRU cache.
+  results.forEach((translated, i) => {
+    const entry = entries[srcIndices[i]];
+    if (!entry || typeof translated !== 'string') return;
+    entry.node.textContent = translated;
+    translatedSnippetCache.set(entry.text, translated);
+  });
+  entries.forEach((entry) => {
+    if (entry.cached !== undefined) entry.node.textContent = entry.cached;
   });
 
   // Put the quoted text back in!

@@ -134,3 +134,49 @@ export function isSTTConfigured(config: STTConfig = readSTTConfig()): boolean {
 export function isTTSConfigured(config: TTSConfig = readTTSConfig()): boolean {
   return Boolean(config.baseUrl && config.apiKey && config.model);
 }
+
+export const TRANSLATION_CONFIG_KEYS = {
+  provider: 'core.trans.provider',
+  baseUrl: 'core.trans.baseUrl',
+};
+
+export type TranslationProviderId = 'chat' | 'deepl' | 'libre';
+
+export const TRANSLATION_PROVIDERS: { id: TranslationProviderId; label: string }[] = [
+  { id: 'chat', label: 'AI model (BYOK)' },
+  { id: 'deepl', label: 'DeepL' },
+  { id: 'libre', label: 'LibreTranslate' },
+];
+
+export type TranslationConfig = {
+  provider: TranslationProviderId;
+  /** Only meaningful for LibreTranslate; DeepL picks its host from the key. */
+  baseUrl: string;
+  /** DeepL key, or the optional LibreTranslate key. Stored via secrets.ts. */
+  apiKey: string;
+};
+
+/**
+ * Translation gets its own provider row for the same reason TTS and STT have one: a chat key
+ * may be expensive per character while DeepL is cheap, and self-hosted LibreTranslate needs no
+ * key at all. `chat` reuses the configured AI model, so one BYOK setup can cover both.
+ */
+export function readTranslationConfig(): TranslationConfig {
+  const provider = read(TRANSLATION_CONFIG_KEYS.provider);
+  return {
+    provider: (TRANSLATION_PROVIDERS.some((item) => item.id === provider)
+      ? provider
+      : 'chat') as TranslationProviderId,
+    baseUrl: normalizeBaseUrl(read(TRANSLATION_CONFIG_KEYS.baseUrl)),
+    apiKey: readSecret('translation'),
+  };
+}
+
+/** The provider decides what "configured" means: a key (DeepL), a URL (Libre) or the chat row. */
+export function isTranslationConfigured(
+  config: TranslationConfig = readTranslationConfig()
+): boolean {
+  if (config.provider === 'deepl') return Boolean(config.apiKey);
+  if (config.provider === 'libre') return Boolean(config.baseUrl);
+  return isChatConfigured(readChatConfig());
+}

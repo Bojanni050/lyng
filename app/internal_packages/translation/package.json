@@ -4,10 +4,9 @@
   "main": "./lib/main",
 
   "isOptional": true,
-  "isIdentityRequired": true,
 
   "title": "Translation",
-  "description": "Translate your drafts in the composer into other languages using the Yandex Translation API.",
+  "description": "Translate your drafts in the composer into other languages with your own translation provider (Bring Your Own Key).",
   "icon": "./icon.png",
 
   "license": "GPL-3.0",

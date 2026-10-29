@@ -1,14 +1,8 @@
 import React, { useRef } from 'react';
-import {
-  localized,
-  Actions,
-  Message,
-  DraftEditingSession,
-  FeatureUsageStore,
-} from 'mailspring-exports';
+import { localized, Actions, Message, DraftEditingSession } from 'mailspring-exports';
 
 import { Menu, RetinaImg } from 'mailspring-component-kit';
-import { TranslatePopupOptions, translateMessageBody, TranslationsUsedLexicon } from './service';
+import { TranslatePopupOptions, translateMessageBody } from './service';
 
 type Props = { draft: Message; session: DraftEditingSession };
 
@@ -18,15 +12,9 @@ const TranslateComposerButtonInner: React.FC<Props> = ({ draft, session }) => {
   const onTranslate = async (langName: string) => {
     Actions.closePopover();
 
-    try {
-      await FeatureUsageStore.markUsedOrUpgrade('translation', TranslationsUsedLexicon);
-    } catch (err) {
-      // user does not have access to this feature
-      return;
-    }
-
     const langCode = TranslatePopupOptions[langName];
     const translated = await translateMessageBody(draft.body, langCode);
+    if (typeof translated !== 'string') return; // failed; the service already showed the error
 
     session.changes.add({ body: translated });
     session.changes.commit();
