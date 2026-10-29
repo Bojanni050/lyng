@@ -10,8 +10,9 @@
  * No dependencies: node:http + a JSON file. Node >= 18.
  *
  * Env: PORT (5199), BIND (127.0.0.1), DATA_FILE (./tracking-data.json), API_TOKEN (optional
- * bearer for /api/* writes — the client sends it as Authorization or ?token=), SHARE_DIR
- * (./shared-data) for thread-sharing uploads.
+ * bearer for /api/* writes — the client sends it as Authorization or ?token=), SHARE_TOKEN
+ * (optional bearer that additionally unlocks /api/share/* writes so tracking can stay open),
+ * SHARE_DIR (./shared-data) for thread-sharing uploads.
  */
 
 const http = require('node:http');
@@ -23,6 +24,8 @@ const PORT = Number(process.env.PORT || 5199);
 const BIND = process.env.BIND || '127.0.0.1';
 const DATA_FILE = path.resolve(process.env.DATA_FILE || path.join(__dirname, 'tracking-data.json'));
 const API_TOKEN = process.env.API_TOKEN || '';
+/** Extra token for share uploads only. Without it, share access follows API_TOKEN. */
+const SHARE_TOKEN = process.env.SHARE_TOKEN || '';
 const SHARE_DIR = path.resolve(process.env.SHARE_DIR || path.join(__dirname, 'shared-data'));
 fs.mkdirSync(SHARE_DIR, { recursive: true });
 
@@ -95,6 +98,22 @@ function authorized(req, url) {
   if (!API_TOKEN) return true;
   const bearer = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
   return bearer === API_TOKEN || url.searchParams.get('token') === API_TOKEN;
+}
+
+/**
+ * Share uploads carry full thread bodies and attachments, so they deserve their own key
+ * even when anonymous open/click counting stays open: SHARE_TOKEN guards only the share
+ * endpoints. With no SHARE_TOKEN set the API_TOKEN rules apply unchanged, which keeps
+ * deployments that already gate everything on API_TOKEN working.
+ */
+function shareAuthorized(req, url) {
+  if (!SHARE_TOKEN) return authorized(req, url);
+  const bearer = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  return (
+    bearer === SHARE_TOKEN ||
+    url.searchParams.get('token') === SHARE_TOKEN ||
+    authorized(req, url)
+  );
 }
 
 const esc = (value) =>
@@ -427,7 +446,7 @@ const server = http.createServer((req, res) => {
   }
 
   if (p.startsWith('/api/share/') && req.method === 'POST') {
-    if (!authorized(req, url)) return json(res, 401, { error: 'unauthorized' });
+    if (!shareAuthorized(req, url)) return json(res, 401, { error: 'unauthorized' });
     handleShareUpload(req, res, url).catch((err) =>
       json(res, 500, { error: err && err.message ? err.message : 'upload failed' })
     );
@@ -569,5 +588,8 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, BIND, () => {
-  console.log(`tracking-server on http://${BIND}:${PORT}  data=${DATA_FILE}${API_TOKEN ? '  (api token required)' : ''}`);
+  console.log(
+    `tracking-server on http://${BIND}:${PORT}  data=${DATA_FILE}` +
+      `${API_TOKEN ? '  (api token required)' : ''}${SHARE_TOKEN ? '  (share token required)' : ''}`
+  );
 });

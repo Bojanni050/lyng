@@ -15,8 +15,8 @@ PORT=8080 BIND=0.0.0.0 API_TOKEN=xxx node server.cjs
 | `GET /api/tracked` | wat de client pollt; `?accountId=` filtert, `?token=`/`Authorization: Bearer` vereist zodra `API_TOKEN` gezet is |
 | `GET /health` | `{ok, tracked, sharedKeys}` |
 | `GET /` | minimale HTML-pagina met de tellingen |
-| `POST /api/share/thread/<key>` | server de thread-payload (JSON) of `{shared:false}` (verwijdert pagina + attachments); `Authorization: Bearer API_TOKEN` vereist zodra gezet |
-| `POST /api/share/asset/<fileId>/<naam>` | uploadt één attachment (max. 100 MB) |
+| `POST /api/share/thread/<key>` | server de thread-payload (JSON) of `{shared:false}` (verwijdert pagina + attachments); `Authorization: Bearer` vereist zodra `API_TOKEN` of `SHARE_TOKEN` gezet is |
+| `POST /api/share/asset/<fileId>/<naam>` | uploadt één attachment (max. 100 MB); zelfde guard als de thread-payload |
 | `GET /s/<key>` | webpagina met het gedeelde gesprek |
 | `GET /s/a/<fileId>/<naam>` | attachment-download van de gedeelde thread |
 
@@ -38,8 +38,12 @@ gebruik; zet er Postgres achter als je meerdere gebruikers krijgt.
   `app/internal_packages/{open,link}-tracking/package.json` → `serverUrl` je publieke HTTPS-host
   (bv. `https://track.example.com`) en hang deze service achter je reverse proxy.
   Hetzelfde geldt voor gedeelde threads: `thread-sharing/package.json` → `serverUrl` regelt de
-  share-URLs. De client stuurt geen bearer mee als er geen `API_TOKEN` staat; met token zet je
-  het in de client in `core.sharing.apiToken` (of env `LYNG_SHARING_TOKEN`).
+  share-URLs. De client stuurt geen bearer mee als er geen token staat in `core.sharing.apiToken`
+  (of env `LYNG_SHARING_TOKEN`). Op de server blokkeer je share-uploads afzonderlijk met
+  `SHARE_TOKEN` — volgt geen `SHARE_TOKEN`, dan gelden de `API_TOKEN`-regels zoals bij de
+  andere `/api/*`-writes, en kan je de tellings-API open laten terwijl share-uploads wél
+  een sleutel vereisen. Zet ook `SHARE_DIR` expliciet als de share-data persistent moet
+  overleven (bv. een volume in plaats van de container-root).
 
 ## Docker
 
