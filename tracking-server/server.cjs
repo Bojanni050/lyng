@@ -103,17 +103,14 @@ function authorized(req, url) {
 /**
  * Share uploads carry full thread bodies and attachments, so they deserve their own key
  * even when anonymous open/click counting stays open: SHARE_TOKEN guards only the share
- * endpoints. With no SHARE_TOKEN set the API_TOKEN rules apply unchanged, which keeps
- * deployments that already gate everything on API_TOKEN working.
+ * endpoints, and while it is set it is the ONLY key to them (the API_TOKEN is unaffected).
+ * With no SHARE_TOKEN set the API_TOKEN rules apply unchanged, which keeps deployments
+ * that already gate everything on API_TOKEN working.
  */
 function shareAuthorized(req, url) {
   if (!SHARE_TOKEN) return authorized(req, url);
   const bearer = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-  return (
-    bearer === SHARE_TOKEN ||
-    url.searchParams.get('token') === SHARE_TOKEN ||
-    authorized(req, url)
-  );
+  return bearer === SHARE_TOKEN || url.searchParams.get('token') === SHARE_TOKEN;
 }
 
 const esc = (value) =>
