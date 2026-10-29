@@ -58,14 +58,18 @@ engine zelf uit een eigen submodule-fork:
 
 ## Wat werkt, en wat niet
 
-**Zonder verdere backend:** snooze, send later, send reminders, activity, undo send, en alle
+**Zonder verdere backend:** snooze, send later, send reminders, activity, undo send,
+translation (BYOK: AI-model/DeepL/LibreTranslate, eigen key), en alle
 mail-functionaliteit (IMAP/SMTP, regels, sjablonen, zoeken).
 
-**Met `tracking-server/`:** open tracking (pixel + teller), link tracking (redirect + teller), en de
-"Opened by"/"Clicked by"-popovers die `open_data`/`click_data` lezen.
+**Met `tracking-server/`:** open tracking (pixel + teller), link tracking (redirect + teller), de
+"Opened by"/"Clicked by"-popovers die `open_data`/`click_data` lezen, en thread-sharing (gedeelde
+threads + attachments als publieke webpagina op `/s/<key>`; accesstoken via `core.sharing.apiToken`
+of `LYNG_SHARING_TOKEN`).
 
-**Bewust uit** (pakketten houden `isIdentityRequired`, dus ze laden niet): `translation`,
-`participant-profile` (contactverrijking), `thread-sharing`. Die kunnen niet zonder server-component.
+**Bewust uit** (pakket houdt `isIdentityRequired`, dus het laadt niet): `participant-profile`
+(contactverrijking). Die vragen een vendor-endpoint op `id.getmailspring.com` en kunnen niet
+zonder server-component.
 
 ## Draaien
 

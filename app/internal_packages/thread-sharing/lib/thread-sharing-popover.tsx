@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Rx, Thread, DatabaseStore, localized, FeatureUsageStore } from 'mailspring-exports';
+import { Rx, Thread, DatabaseStore, localized } from 'mailspring-exports';
 import { RetinaImg } from 'mailspring-component-kit';
 
 import CopyButton from './copy-button';
@@ -52,21 +52,6 @@ export default class ThreadSharingPopover extends React.Component<
 
     try {
       if (!this.state.url) {
-        try {
-          await FeatureUsageStore.markUsedOrUpgrade('thread-sharing', {
-            headerText: localized('All Sharing Links Used'),
-            rechargeText: `${localized(
-              `You can share %1$@ emails each %2$@ with Lyng Basic.`
-            )} ${localized('Upgrade to Pro today!')}`,
-            iconUrl: 'mailspring://thread-sharing/assets/ic-modal-image@2x.png',
-          });
-        } catch (error) {
-          if (error instanceof FeatureUsageStore.NoProAccessError) {
-            if (this._mounted) this.setState({ saving: false });
-            return;
-          }
-        }
-
         await syncThreadToWeb(this.props.thread);
         nextUrl = sharingURLForThread(this.props.thread);
       } else {

@@ -13,12 +13,20 @@ PORT=8080 BIND=0.0.0.0 API_TOKEN=xxx node server.cjs
 | `GET /o/<token>.png` | 1×1 pixel; `token` = base64url(JSON `{messageId, accountId, recipient}`), precies wat de composer maakt |
 | `GET /link/<messageId>/<i>?redirect=<url>&recipient=<base64>` | telt de klik en stuurt 302 naar het originele doel (alleen http/https) |
 | `GET /api/tracked` | wat de client pollt; `?accountId=` filtert, `?token=`/`Authorization: Bearer` vereist zodra `API_TOKEN` gezet is |
-| `GET /health` | `{ok, tracked}` |
+| `GET /health` | `{ok, tracked, sharedKeys}` |
 | `GET /` | minimale HTML-pagina met de tellingen |
+| `POST /api/share/thread/<key>` | server de thread-payload (JSON) of `{shared:false}` (verwijdert pagina + attachments); `Authorization: Bearer API_TOKEN` vereist zodra gezet |
+| `POST /api/share/asset/<fileId>/<naam>` | uploadt één attachment (max. 100 MB) |
+| `GET /s/<key>` | webpagina met het gedeelde gesprek |
+| `GET /s/a/<fileId>/<naam>` | attachment-download van de gedeelde thread |
+
+Attachments en thread-payloads staan los van de tracking-JSON in `SHARE_DIR`
+(standaard `./shared-data`, afzonderlijk mountable). De webpagina draait de message-HTML
+in een geïsoleerde sandbox-iframe met een CSP zonder scripts.
 
 Opslag is één JSON-bestand (`DATA_FILE`, standaard `./tracking-data.json`, atomair weggeschreven,
-max. 1×/seconde). Dat is genoeg voor eigen gebruik; zet er Postgres achter als je meerdere
-gebruikers krijgt.
+max. 1×/seconde) plus één map attachements/payloads (`SHARE_DIR`). Dat is genoeg voor eigen
+gebruik; zet er Postgres achter als je meerdere gebruikers krijgt.
 
 ## Twee dingen die je moet weten
 
@@ -29,6 +37,9 @@ gebruikers krijgt.
   `http://127.0.0.1:5199` werkt alleen voor testen naar jezelf. Zet in
   `app/internal_packages/{open,link}-tracking/package.json` → `serverUrl` je publieke HTTPS-host
   (bv. `https://track.example.com`) en hang deze service achter je reverse proxy.
+  Hetzelfde geldt voor gedeelde threads: `thread-sharing/package.json` → `serverUrl` regelt de
+  share-URLs. De client stuurt geen bearer mee als er geen `API_TOKEN` staat; met token zet je
+  het in de client in `core.sharing.apiToken` (of env `LYNG_SHARING_TOKEN`).
 
 ## Docker
 

@@ -1,16 +1,15 @@
 import fs from 'fs';
 import {
-  IdentityStore,
   DatabaseStore,
   Thread,
   Message,
   Actions,
   AttachmentStore,
   SyncbackMetadataTask,
-  MailspringAPIRequest,
   QuotedHTMLTransformer,
   ComponentRegistry,
   DatabaseChangeRecord,
+  AccountStore,
 } from 'mailspring-exports';
 
 import plugin from '../package.json';
@@ -19,7 +18,16 @@ import ThreadSharingButton from './thread-sharing-button';
 export const PLUGIN_NAME = plugin.title;
 export const PLUGIN_ID = plugin.name;
 
+/** Self-hosted share backend, resolved per env the same way open-tracking resolves its URL. */
+const PLUGIN_URL = plugin.serverUrl[AppEnv.config.get('env')];
+
 const _readFile = Promise.promisify(fs.readFile);
+
+/** Optional bearer for the share uploads; leave empty when the server runs without API_TOKEN. */
+function shareAuthorization() {
+  const token = AppEnv.config.get('core.sharing.apiToken') || process.env.LYNG_SHARING_TOKEN || '';
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 const _onDatabaseChange = (change: DatabaseChangeRecord<any>) => {
   if (change.type !== 'persist' || change.objectClass !== Thread.name) {
@@ -43,9 +51,7 @@ export function sharingURLForThread(thread: Thread) {
   if (!metadata || !metadata.key || !metadata.shared) {
     return null;
   }
-  const identity = IdentityStore.identity();
-  if (!identity) return null;
-  return `https://shared.getmailspring.com/thread/${identity.id}/${metadata.key}`;
+  return `${PLUGIN_URL}/s/${encodeURIComponent(metadata.key)}`;
 }
 
 let soon = {};
@@ -62,12 +68,40 @@ const syncThreadToWebSoon = (thread: Thread) => {
         try {
           await syncThreadToWeb(thread);
         } catch (err) {
-          console.warn(`Unable to sync thread '${thread.subject}' to the cloud: ${err}`);
+          console.warn(`Unable to sync thread '${thread.subject}' to the web: ${err}`);
         }
       });
     }, 5000);
   }
 };
+
+/** Uploads one attachment and answers with the link the web view can fetch it back on. */
+async function uploadShareAsset(rel: string, data: Buffer): Promise<string> {
+  const response = await fetch(`${PLUGIN_URL}/api/share/asset/${rel}`, {
+    method: 'POST',
+    headers: shareAuthorization(),
+    // A Uint8Array (rather than a Blob with a guessed type) keeps uploads byte-exact.
+    body: new Uint8Array(data),
+  });
+  if (!response.ok) {
+    throw new Error(`Attachment upload failed (HTTP ${response.status})`);
+  }
+  return `${PLUGIN_URL}/s/a/${rel}`;
+}
+
+/** Upserts the thread payload; `{shared: false}` removes the shared page server-side. */
+async function uploadSharePayload(key: string, payload: Record<string, unknown>) {
+  const response = await fetch(`${PLUGIN_URL}/api/share/thread/${encodeURIComponent(key)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...shareAuthorization() },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Thread share upload failed (HTTP ${response.status}). Check the API token setting (core.sharing.apiToken).`
+    );
+  }
+}
 
 export const syncThreadToWeb = async (thread: Thread) => {
   const metadata = thread.metadataForPluginId(PLUGIN_ID) || {};
@@ -103,35 +137,33 @@ export const syncThreadToWeb = async (thread: Thread) => {
       if (data.length === 0) {
         throw new Error(`File ${filePath} is not on disk.`);
       }
-      const link = await MailspringAPIRequest.postStaticAsset({
-        filename: `${file.id}/${file.displayName()}`,
-        blob: new Blob([new Uint8Array(data)], { type: 'application/octet-stream' }),
-      });
-      metadata.fileURLs[file.id] = link;
+      const rel = `${encodeURIComponent(file.id)}/${encodeURIComponent(file.displayName())}`;
+      metadata.fileURLs[file.id] = await uploadShareAsset(rel, data);
     } catch (err) {
       console.log(`Could not upload attachment ${file.displayName()}: ${err}`);
     }
   }
 
-  const identity = IdentityStore.identity();
-  if (!identity) return;
-  const { firstName, lastName, emailAddress } = identity;
+  // The Reader is whoever owns the mail account; no Mailspring identity is involved any more.
+  const me = AccountStore.accountForId(thread.accountId)?.me();
+  const sharedBy = {
+    firstName: me?.firstName || '',
+    lastName: me?.lastName || '',
+    emailAddress: me?.emailAddress || '',
+  };
 
   // next, post the JSON for the entire thread
-  await MailspringAPIRequest.postStaticAsset({
-    filename: metadata.key,
-    blob: JSON.stringify({
-      thread: thread,
-      sharedBy: { firstName, lastName, emailAddress },
-      fileURLs: metadata.fileURLs,
-      messages: messages.map((m) =>
-        Object.assign({}, m.toJSON(), {
-          body: QuotedHTMLTransformer.removeQuotedHTML(m.body, {
-            keepIfWholeBodyIsQuote: true,
-          }),
-        })
-      ),
-    }),
+  await uploadSharePayload(metadata.key, {
+    thread: thread,
+    sharedBy: sharedBy,
+    fileURLs: metadata.fileURLs,
+    messages: messages.map((m) =>
+      Object.assign({}, m.toJSON(), {
+        body: QuotedHTMLTransformer.removeQuotedHTML(m.body, {
+          keepIfWholeBodyIsQuote: true,
+        }),
+      })
+    ),
   });
 
   Actions.queueTask(
@@ -145,10 +177,8 @@ export const syncThreadToWeb = async (thread: Thread) => {
 
 export const unsyncThread = async (thread: Thread) => {
   const metadata = thread.metadataForPluginId(PLUGIN_ID) || {};
-  await MailspringAPIRequest.postStaticAsset({
-    filename: metadata.key,
-    blob: JSON.stringify({ shared: false }),
-  });
+  if (!metadata.key) return;
+  await uploadSharePayload(metadata.key, { shared: false });
 
   Actions.queueTask(
     SyncbackMetadataTask.forSaving({
